@@ -1,0 +1,11 @@
+server:
+  port: 8085
+
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/it_mentor_community_platform
+    username: root
+    password: password
+    driver-class-name: org.postgresql.Driver
+
