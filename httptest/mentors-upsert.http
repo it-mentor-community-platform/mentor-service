@@ -1,0 +1,42 @@
+
+### 201/200-Succefuly created/update
+POST http://localhost:8085//api/mentor/internal/guaranteed-review
+Content-Type: application/json
+X-Telegram-User-Id: 12323
+
+{
+  "telegram_url": "https://t.me/zhukovsd",
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 5
+}
+###
+
+### 400-Telegram profile url incorrect
+POST http://localhost:8085//api/mentor/internal/guaranteed-review
+Content-Type: application/json
+X-Telegram-User-Id: 12323
+
+{
+  "telegram_url": "https://tzhukovsd",
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 400-Invalid project type
+POST http://localhost:8085//api/mentor/internal/guaranteed-review
+Content-Type: application/json
+X-Telegram-User-Id: 12323
+
+{
+  "telegram_url": "https://t.me/zhukovsd",
+  "language": "Java",
+  "project_type": "MOTION",
+  "price_usd": 10
+}
+
+
+
+
