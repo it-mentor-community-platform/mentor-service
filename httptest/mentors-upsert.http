@@ -1,13 +1,13 @@
 ### 201/200-Succefuly created/update
-POST http://localhost:8085//api/mentor/internal/guaranteed-review
+POST http://localhost:8085/api/mentor/internal/guaranteed-review
 Content-Type: application/json
-X-Telegram-User-Id: 12323
+X-Telegram-User-Id: 11
 
 {
-  "telegram_url": "https://t.me/zhukovsd",
+  "telegram_url": "https://t.me/zhukovs",
   "language": "Java",
   "project_type": "SIMULATION",
-  "price_usd": 5
+  "price_usd": 15
 }
 ###
 
