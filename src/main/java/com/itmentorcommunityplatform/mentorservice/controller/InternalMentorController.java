@@ -1,10 +1,12 @@
 package com.itmentorcommunityplatform.mentorservice.controller;
 
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddPricesForGuranteedReviews;
+import com.itmentorcommunityplatform.mentorservice.domain.type.UpsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.ApiMessageResponse;
 import com.itmentorcommunityplatform.mentorservice.service.MentorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +23,17 @@ public class InternalMentorController {
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
             @RequestBody AddPriceForGuaranteedReviewRequest request) {
 
-        mentorService.upsertMentorAndGuaranteedReviewsPrices(telegramUserId, request);
+        UpsertResult upsertResult = mentorService.upsertMentorAndGuaranteedReviewsPrices(telegramUserId, request);
 
-        return ResponseEntity.ok().body(new ApiMessageResponse("Upsert successful"));
+        if (upsertResult.equals(UpsertResult.CREATED)) {
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new ApiMessageResponse("Created successfully"));
+        }
+
+        return ResponseEntity
+                .ok()
+                .body(new ApiMessageResponse("Update successfully"));
     }
 
 }

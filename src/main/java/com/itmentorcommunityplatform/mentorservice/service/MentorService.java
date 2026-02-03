@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.service;
 
+import com.itmentorcommunityplatform.mentorservice.domain.type.UpsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidator;
@@ -20,12 +21,17 @@ public class MentorService {
     private final MentorsRepository mentorsRepository;
 
     @Transactional
-    public void upsertMentorAndGuaranteedReviewsPrices(Long telegramUserId, AddPriceForGuaranteedReviewRequest request) {
+    public UpsertResult upsertMentorAndGuaranteedReviewsPrices(Long telegramUserId, AddPriceForGuaranteedReviewRequest request) {
 
         telegramUrlValidator.validate(request.telegramUrl());
         projectTypeValidator.validate(request.projectType());
 
         mentorsRepository.upsertMentor(telegramUserId, request.telegramUrl());
-        mentorsRepository.updatePriceForGuaranteedReviews(request.priceUsd(), request.projectType(), telegramUserId, request.language());
+        boolean inserted = mentorsRepository.updatePriceForGuaranteedReviews(request.priceUsd(),
+                request.projectType(),
+                telegramUserId,
+                request.language());
+
+        return inserted ? UpsertResult.CREATED : UpsertResult.UPDATED;
     }
 }
