@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @RestControllerAdvice
@@ -29,5 +30,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ApiMessageResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiMessageResponse> handleStatusException(ResponseStatusException e) {
+
+        return ResponseEntity
+                .status(e.getStatusCode())
+                .body(new ApiMessageResponse(e.getReason()));
+
     }
 }

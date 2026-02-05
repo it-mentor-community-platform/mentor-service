@@ -20,10 +20,9 @@ public class InternalMentorController {
     @PostMapping("/internal/guaranteed-review")
     @PostAddPricesForGuranteedReviews
     public ResponseEntity<ApiMessageResponse> addPriceForGuaranteedReview(
-            @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
             @RequestBody AddPriceForGuaranteedReviewRequest request) {
 
-        UpsertResult upsertResult = mentorService.upsertMentorAndGuaranteedReviewsPrices(telegramUserId, request);
+        UpsertResult upsertResult = mentorService.upsertMentorAndGuaranteedReviewsPrices(request);
 
         if (upsertResult.equals(UpsertResult.CREATED)) {
             return ResponseEntity

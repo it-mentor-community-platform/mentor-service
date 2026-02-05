@@ -4,10 +4,10 @@ Content-Type: application/json
 X-Telegram-User-Id: 11224
 
 {
-  "telegram_url": "https://t.me/zhukovs",
+  "telegram_url": "https://t.me/V3rgi",
   "language": "Java",
   "project_type": "SIMULATION",
-  "price_usd": 15
+  "price_usd": 10
 }
 ###
 
@@ -36,6 +36,19 @@ X-Telegram-User-Id: 12323
   "price_usd": 10
 }
 
+###
+
+### 404-Not found profile
+POST http://localhost:8085//api/mentor/internal/guaranteed-review
+Content-Type: application/json
+X-Telegram-User-Id: 12323
+
+{
+  "telegram_url": "https://t.me/V3rog",
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
 
 
 

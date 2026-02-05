@@ -66,6 +66,17 @@ import java.lang.annotation.Target;
                 ))
         ,
         @ApiResponse(
+                responseCode = "404",
+                description = "Telegram url not found",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(example = """
+                                {
+                                   "message": "Telegram url not found"
+                                }
+                                """)
+                )),
+        @ApiResponse(
                 responseCode = "500",
                 description = "Internal server error",
                 content = @Content(
