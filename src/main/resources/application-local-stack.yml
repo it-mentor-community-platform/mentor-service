@@ -6,4 +6,4 @@ spring:
     driver-class-name: org.postgresql.Driver
 
 mentorservice:
-  profile-service-base-url: "http://localhost:8083"
+  profile-service-base-url: "http://profile-service:8080"
