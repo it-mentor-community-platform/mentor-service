@@ -4,3 +4,6 @@ spring:
     username: root
     password: password
     driver-class-name: org.postgresql.Driver
+
+mentorservice:
+  profile-service-base-url: "http://profile-service:8080"

@@ -1,20 +1,18 @@
 ### 201/200-Succefuly created/update
 POST http://localhost:8085/api/mentor/internal/guaranteed-review
 Content-Type: application/json
-X-Telegram-User-Id: 11224
 
 {
-  "telegram_url": "https://t.me/zhukovs",
+  "telegram_url": "https://t.me/V3rgi",
   "language": "Java",
   "project_type": "SIMULATION",
-  "price_usd": 15
+  "price_usd": 10
 }
 ###
 
 ### 400-Telegram profile url incorrect
 POST http://localhost:8085//api/mentor/internal/guaranteed-review
 Content-Type: application/json
-X-Telegram-User-Id: 12323
 
 {
   "telegram_url": "https://tzhukovsd",
@@ -27,7 +25,6 @@ X-Telegram-User-Id: 12323
 ### 400-Invalid project type
 POST http://localhost:8085//api/mentor/internal/guaranteed-review
 Content-Type: application/json
-X-Telegram-User-Id: 12323
 
 {
   "telegram_url": "https://t.me/zhukovsd",
@@ -36,6 +33,18 @@ X-Telegram-User-Id: 12323
   "price_usd": 10
 }
 
+###
+
+### 404-Not found profile
+POST http://localhost:8085//api/mentor/internal/guaranteed-review
+Content-Type: application/json
+
+{
+  "telegram_url": "https://t.me/V3rog",
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
 
 
 
