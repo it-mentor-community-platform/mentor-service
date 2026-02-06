@@ -1,16 +1,7 @@
 package com.itmentorcommunityplatform.mentorservice.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-@Data
-@AllArgsConstructor
-public class ProfileDetailsDto {
-
-    @JsonProperty("github_profile_url")
-    private String githubProfile;
-    @JsonProperty("telegram_url")
-    private String telegramUrl;
-
-}
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+public record ProfileDetailsDto(String githubProfile, String telegramUrl) {}

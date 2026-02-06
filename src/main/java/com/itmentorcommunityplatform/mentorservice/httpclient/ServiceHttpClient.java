@@ -23,7 +23,7 @@ public class ServiceHttpClient {
     public Optional<ProfileWithTelegramIdDto> getProfileByTgUrl(String telegramUrl) {
 
         String url = UriComponentsBuilder
-                .fromHttpUrl(properties.getProfileServiceBaseUrl())
+                .fromUriString(properties.getProfileServiceBaseUrl())
                 .path("/api/profile/internal/profile/by-telegram-url")
                 .queryParam("url", telegramUrl)
                 .toUriString();
