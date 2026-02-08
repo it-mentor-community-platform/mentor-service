@@ -1,3 +1,15 @@
 spring:
   application:
     name: mentor-service
+
+management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - prometheus
+          - info
