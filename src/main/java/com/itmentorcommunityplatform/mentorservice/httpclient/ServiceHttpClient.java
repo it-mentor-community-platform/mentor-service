@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.mentorservice.httpclient;
 
 import com.itmentorcommunityplatform.mentorservice.config.MentorServiceProperties;
 import com.itmentorcommunityplatform.mentorservice.dto.ProfileWithTelegramIdDto;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ public class ServiceHttpClient {
 
     private final WebClient webClient;
     private final MentorServiceProperties properties;
+    private final Counter failedAttempts;
 
     public Optional<ProfileWithTelegramIdDto> getProfileByTgUrl(String telegramUrl) {
 
@@ -43,7 +45,7 @@ public class ServiceHttpClient {
                     .blockOptional();
 
         } catch (Exception e) {
-
+            failedAttempts.increment();
             log.error("Failed calling profile-service. url={}", telegramUrl, e);
             throw e;
 

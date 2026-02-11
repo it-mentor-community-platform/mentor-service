@@ -10,6 +10,17 @@ spring:
     driver-class-name: org.postgresql.Driver
 
 
+management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - prometheus
+          - info
 
 mentorservice:
   profile-service-base-url: "http://localhost:8083"
