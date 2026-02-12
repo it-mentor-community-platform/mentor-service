@@ -1,14 +1,12 @@
 server:
   port: 8085
 
-
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/it_mentor_community_platform
+    url: jdbc:postgresql://localhost:5432/it_mentor_community_platform?currentSchema=mentor_service
     username: root
     password: password
     driver-class-name: org.postgresql.Driver
-
 
 management:
   metrics:
