@@ -8,6 +8,11 @@ spring:
     password: password
     driver-class-name: org.postgresql.Driver
 
+  kafka:
+    bootstrap-servers: localhost:29092
+    topic:
+      auth-user-authenticated: auth.user.authenticated
+
 management:
   metrics:
     tags:

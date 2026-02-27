@@ -6,6 +6,8 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    topic:
+      auth-user-authenticated: staging.auth.user.authenticated
     properties:
       security.protocol: ${KAFKA_SECURITY_PROTOCOL}
       sasl.mechanism: ${KAFKA_SASL_MECHANISM}

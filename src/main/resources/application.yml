@@ -2,6 +2,14 @@ spring:
   application:
     name: mentor-service
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: mentor-service-group
+      auto-offset-reset: earliest
+    listener:
+      missing-topics-fatal: true
+
 management:
   metrics:
     tags:
