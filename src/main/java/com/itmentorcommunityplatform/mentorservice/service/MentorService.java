@@ -28,11 +28,6 @@ public class MentorService {
     private final MentorsRepository mentorsRepository;
     private final ServiceHttpClient httpClient;
 
-    private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {
-        return event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank() ?
-                "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
-    }
-
     @Transactional
     public UpsertResult upsertMentorAndGuaranteedReviewsPrices(AddPriceForGuaranteedReviewRequest request) {
         telegramUrlValidator.validate(request.telegramUrl());
@@ -69,5 +64,10 @@ public class MentorService {
 
         Mentor updated = mentorsRepository.updateMentor(event.getTelegramUserId(), telegramUrl, isActive);
         log.info("Mentor with telegram id: {} has been updated", updated.getMentorTelegramUserId());
+    }
+
+    private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {
+        return event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank() ?
+                "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
     }
 }
