@@ -1,0 +1,111 @@
+### 1. 201/200-Succefuly created/update
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "mentorTelegramUserId": 123456,
+  "telegramUrl": "https://t.me/zhukovsd",
+  "description": {
+    "name": "Sergey Zhukov",
+    "cost": "PAID",
+    "description": "Мои услуги - https://zhukovsd.it/services/"
+  },
+  "programmingLanguages": ["Java", "Python", "Kotlin"],
+  "services": ["менторство по поиску работы", "консультации"]
+}
+
+### 2. 400-validation failed (Mentor telegram user id is required)
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "telegramUrl": "https://t.me/zhukovsd",
+  "description": {
+    "name": "Sergey Zhukov",
+    "cost": "PAID",
+    "description": "Мои услуги - https://zhukovsd.it/services/"
+  },
+  "programmingLanguages": ["Java", "Python", "Kotlin"],
+  "services": ["менторство по поиску работы", "консультации"]
+}
+
+### 3. 400-validation failed (Description is required)
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "mentorTelegramUserId": 123456,
+  "telegramUrl": "https://t.me/zhukovsd",
+  "programmingLanguages": ["Java", "Python", "Kotlin"],
+  "services": ["менторство по поиску работы", "консультации"]
+}
+
+### 4. 400-validation failed (Description name is required)
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "mentorTelegramUserId": 123456,
+  "telegramUrl": "https://t.me/zhukovsd",
+  "description": {
+    "name": null,
+    "cost": "PAID",
+    "description": "Мои услуги - https://zhukovsd.it/services/"
+  },
+  "programmingLanguages": ["Java", "Python", "Kotlin"],
+  "services": ["менторство по поиску работы", "консультации"]
+}
+
+### 5. 400-validation failed (Telegram profile url incorrect)
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "mentorTelegramUserId": 123456,
+  "telegramUrl": "zhukovsd",
+  "description": {
+    "name": "Sergey Zhukov",
+    "cost": "PAID",
+    "description": "Мои услуги - https://zhukovsd.it/services/"
+  },
+  "programmingLanguages": ["Java", "Python", "Kotlin"],
+  "services": ["менторство по поиску работы", "консультации"]
+}
+
+### 6. 400-validation failed (Programming languages are required)
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "mentorTelegramUserId": 123456,
+  "telegramUrl": "https://t.me/zhukovsd",
+  "description": {
+    "name": "Sergey Zhukov",
+    "cost": "PAID",
+    "description": "Мои услуги - https://zhukovsd.it/services/"
+  },
+  "services": ["менторство по поиску работы", "консультации"]
+}
+
+### 7. 400-validation failed (Services are required)
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "mentorTelegramUserId": 123456,
+  "telegramUrl": "https://t.me/zhukovsd",
+  "description": {
+    "name": "Sergey Zhukov",
+    "cost": "PAID",
+    "description": "Мои услуги - https://zhukovsd.it/services/"
+  },
+  "programmingLanguages": ["Java", "Python", "Kotlin"]
+}
+
+### 8. 500-invalid request
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "mentorTelegramUserId": "https://t.me/zhukovsd"
+}

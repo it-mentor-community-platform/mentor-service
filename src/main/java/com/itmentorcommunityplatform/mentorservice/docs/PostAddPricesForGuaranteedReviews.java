@@ -90,5 +90,5 @@ import java.lang.annotation.Target;
 }
 )
 
-public @interface PostAddPricesForGuranteedReviews {
+public @interface PostAddPricesForGuaranteedReviews {
 }
