@@ -4,15 +4,14 @@ import com.itmentorcommunityplatform.mentorservice.dto.ApiMessageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiMessageResponse> handleAnyException(Exception e) {
@@ -30,6 +29,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ApiMessageResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiMessageResponse> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ApiMessageResponse(e.getBindingResult().getFieldError().getDefaultMessage()));
     }
 
     @ExceptionHandler(ResponseStatusException.class)
