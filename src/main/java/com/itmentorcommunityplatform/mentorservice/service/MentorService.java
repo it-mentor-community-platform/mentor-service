@@ -1,6 +1,8 @@
 package com.itmentorcommunityplatform.mentorservice.service;
 
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
+import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
+import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLanguage;
 import com.itmentorcommunityplatform.mentorservice.domain.type.UpsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
@@ -15,6 +17,7 @@ import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidato
 import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,14 +68,12 @@ public class MentorService {
 
         boolean inserted = mentorUpsertResult.inserted();
 
-        mentorsRepository.upsertMentorDescription(
-                mentorUpsertResult.id(),
-                request.description().name(),
-                request.description().cost(),
-                request.description().description());
+        Mentor mentor = mentorsRepository.findById(mentorUpsertResult.id()).orElseThrow();
+        mentor.setMentorDescription(buildDescription(request, mentor));
+        mentor.setProgrammingLanguages(buildLanguages(request.programmingLanguages()));
+        mentor.setServices(buildServices(request.services()));
 
-        upsertLanguages(mentorUpsertResult.id(), request.programmingLanguages());
-        upsertServices(mentorUpsertResult.id(), request.services());
+        mentorsRepository.save(mentor);
         log.info("Mentor with telegram url: {} has been upserted", request.telegramUrl());
 
         return inserted ? UpsertResult.CREATED : UpsertResult.UPDATED;
@@ -96,16 +99,35 @@ public class MentorService {
         log.info("Mentor with telegram id: {} has been updated", updated.getMentorTelegramUserId());
     }
 
-    private void upsertLanguages(Long mentorId, List<String> languages) {
-        List<Long> languagesIds = languages.stream().map(programmingLanguagesRepository::upsertProgrammingLanguage).toList();
-        programmingLanguagesRepository.deleteMentorsProgrammingLanguages(mentorId);
-        languagesIds.forEach(languageId -> programmingLanguagesRepository.insertMentorsProgrammingLanguage(mentorId, languageId));
+    private Set<MentorProgrammingLanguage> buildLanguages(List<String> languages) {
+        return languages.stream()
+                .map(programmingLanguagesRepository::upsertProgrammingLanguage)
+                .map(id -> new MentorProgrammingLanguage(AggregateReference.to(id)))
+                .collect(Collectors.toSet());
     }
 
-    private void upsertServices(Long mentorId, List<String> services) {
-        List<Long> servicesIds = services.stream().map(servicesRepository::upsertServices).toList();
-        servicesRepository.deleteMentorsServices(mentorId);
-        servicesIds.forEach(serviceId -> servicesRepository.insertMentorsServices(mentorId, serviceId));
+    private Set<com.itmentorcommunityplatform.mentorservice.domain.MentorService> buildServices(List<String> services) {
+        return services.stream()
+                .map(servicesRepository::upsertService)
+                .map(id -> new com.itmentorcommunityplatform.mentorservice.domain.MentorService(AggregateReference.to(id)))
+                .collect(Collectors.toSet());
+    }
+
+    private MentorDescription buildDescription(AddMentorWithDescriptionRequest request, Mentor mentor) {
+        MentorDescription description = mentor.getMentorDescription();
+
+        if (description != null) {
+            description.setMentorUserId(mentor.getId());
+            description.setName(request.description().name());
+            description.setCost(request.description().cost());
+            description.setDescription(request.description().description());
+        } else {
+            description = new MentorDescription();
+            description.setName(request.description().name());
+            description.setCost(request.description().cost());
+            description.setDescription(request.description().description());
+        }
+        return description;
     }
 
     private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {

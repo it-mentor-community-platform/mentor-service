@@ -26,7 +26,6 @@ public interface MentorsRepository extends CrudRepository<Mentor, Long> {
     MentorUpsertResult upsertMentor(@Param("telegramUserId") Long telegramUserId,
                                     @Param("telegramUrl") String telegramUrl);
 
-
     @Query("""
             UPDATE mentors
             SET telegram_url = :telegramUrl,

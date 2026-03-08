@@ -17,17 +17,4 @@ public interface ProgrammingLanguagesRepository extends CrudRepository<Programmi
             """)
     Long upsertProgrammingLanguage(String name);
 
-    @Modifying
-    @Query("""
-            DELETE FROM mentors_programming_languages
-            WHERE mentor_id = :mentorId
-            """)
-    void deleteMentorsProgrammingLanguages(Long mentorId);
-
-    @Modifying
-    @Query("""
-            INSERT INTO mentors_programming_languages (mentor_id, programming_language_id)
-            VALUES (:mentorId, :programmingLanguageId)
-            """)
-    void insertMentorsProgrammingLanguage(Long mentorId, Long programmingLanguageId);
 }

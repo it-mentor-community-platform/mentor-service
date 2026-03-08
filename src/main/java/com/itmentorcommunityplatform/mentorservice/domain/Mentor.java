@@ -36,7 +36,7 @@ public class Mentor {
     private Set<GuaranteedReviewsPrices> prices = new HashSet<>();
 
     @MappedCollection(idColumn = "mentor_user_id")
-    private Set<MentorDescription> mentorDescription;
+    private MentorDescription mentorDescription;
 
     @MappedCollection(idColumn = "mentor_id", keyColumn = "programming_language_id")
     private Set<MentorProgrammingLanguage> programmingLanguages = new HashSet<>();
