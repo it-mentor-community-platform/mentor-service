@@ -3,7 +3,7 @@ POST http://localhost:8085/api/mentor/internal/guaranteed-review
 Content-Type: application/json
 
 {
-  "telegram_url": "https://t.me/V3rgi",
+  "telegram_url": "https://t.me/zhukovsd",
   "language": "Java",
   "project_type": "SIMULATION",
   "price_usd": 10

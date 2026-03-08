@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/changesets/002-create-unique-index.sql
   - include:
       file: db/changelog/changesets/003-create-tables.sql
+  - include:
+      file: db/changelog/changesets/004-add-unique-constraint.sql

@@ -15,19 +15,6 @@ public interface ServicesRepository extends CrudRepository<Service, Integer> {
             SET name = EXCLUDED.name
             RETURNING id;
             """)
-    Long upsertServices(String name);
+    Long upsertService(String name);
 
-    @Modifying
-    @Query("""
-            DELETE FROM mentors_services
-            WHERE mentor_id = :mentorId
-            """)
-    void deleteMentorsServices(Long mentorId);
-
-    @Modifying
-    @Query("""
-            INSERT INTO mentors_services (mentor_id, service_id)
-            VALUES (:mentorId, :serviceId)
-            """)
-    void insertMentorsServices(Long mentorId, Long serviceId);
 }
