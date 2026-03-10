@@ -49,14 +49,4 @@ public interface MentorsRepository extends CrudRepository<Mentor, Long> {
 
     Optional<Mentor> getMentorByMentorTelegramUserId(Long mentorTelegramUserId);
 
-    @Query("""
-            INSERT INTO mentor_descriptions (mentor_user_id, name, cost, description)
-                VALUES (:mentorUserId, :name, :cost, :description)
-                ON CONFLICT (mentor_user_id)
-                DO UPDATE SET name = EXCLUDED.name,
-                              cost = EXCLUDED.cost,
-                              description = EXCLUDED.description
-                RETURNING id, mentor_user_id, name, cost, description;
-            """)
-    MentorDescription upsertMentorDescription(Long mentorUserId, String name, String cost, String description);
 }
