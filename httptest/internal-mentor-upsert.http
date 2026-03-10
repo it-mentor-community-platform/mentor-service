@@ -101,11 +101,3 @@ Content-Type: application/json
   },
   "programmingLanguages": ["Java", "Python", "Kotlin"]
 }
-
-### 8. 500-invalid request
-POST http://localhost:8085/api/mentor/internal/mentor
-Content-Type: application/json
-
-{
-  "mentorTelegramUserId": "https://t.me/zhukovsd"
-}
