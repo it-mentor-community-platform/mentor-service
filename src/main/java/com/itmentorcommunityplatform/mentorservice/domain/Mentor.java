@@ -35,4 +35,12 @@ public class Mentor {
     @MappedCollection(idColumn = "mentor_id")
     private Set<GuaranteedReviewsPrices> prices = new HashSet<>();
 
+    @MappedCollection(idColumn = "mentor_user_id")
+    private MentorDescription mentorDescription;
+
+    @MappedCollection(idColumn = "mentor_id", keyColumn = "programming_language_id")
+    private Set<MentorProgrammingLanguage> programmingLanguages = new HashSet<>();
+
+    @MappedCollection(idColumn = "mentor_id", keyColumn = "service_id")
+    private Set<MentorService> services = new HashSet<>();
 }

@@ -1,0 +1,20 @@
+package com.itmentorcommunityplatform.mentorservice.repository;
+
+import com.itmentorcommunityplatform.mentorservice.domain.Service;
+import org.springframework.data.jdbc.repository.query.Modifying;
+import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.repository.CrudRepository;
+
+public interface ServicesRepository extends CrudRepository<Service, Integer> {
+
+    @Query("""
+            INSERT INTO services (name)
+            VALUES (:name)
+            ON CONFLICT (lower(name))
+            DO UPDATE 
+            SET name = EXCLUDED.name
+            RETURNING id;
+            """)
+    Long upsertService(String name);
+
+}

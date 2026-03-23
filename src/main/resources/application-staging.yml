@@ -6,6 +6,8 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    topic:
+      auth-user-authenticated: staging.auth.user.authenticated
     properties:
       security.protocol: ${KAFKA_SECURITY_PROTOCOL}
       sasl.mechanism: ${KAFKA_SASL_MECHANISM}
@@ -14,4 +16,4 @@ spring:
       ssl.truststore.location: ${KAFKA_SSL_TRUSTSTORE_LOCATION}
 
 mentorservice:
-  profile-service-base-url: ${PROFILE_SERVICE_BASE_URL}
+  profile-service-base-url: "http://profile-service:8080"

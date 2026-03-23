@@ -5,5 +5,10 @@ spring:
     password: password
     driver-class-name: org.postgresql.Driver
 
+  kafka:
+    bootstrap-servers: kafka:9092
+    topic:
+      auth-user-authenticated: auth.user.authenticated
+
 mentorservice:
   profile-service-base-url: "http://profile-service:8080"
