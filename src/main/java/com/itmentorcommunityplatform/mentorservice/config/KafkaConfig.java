@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.config;
 
+import com.itmentorcommunityplatform.mentorservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -37,6 +38,7 @@ public class KafkaConfig {
         typeMapper.addTrustedPackages("*");
         Map<String, Class<?>> mappings = new HashMap<>();
         mappings.put("com.itmentorcommunityplatform.authservice.kafka.UserAuthenticatedEvent", UserAuthenticatedEvent.class);
+        mappings.put("com.itmentorcommunityplatform.projectservice.kafka.ProjectCreatedEvent", ProjectCreatedEvent.class);
         typeMapper.setIdClassMapping(mappings);
         converter.setTypeMapper(typeMapper);
         return converter;
