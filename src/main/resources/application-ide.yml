@@ -12,6 +12,7 @@ spring:
     bootstrap-servers: localhost:29092
     topic:
       auth-user-authenticated: auth.user.authenticated
+      projects-project-created: projects.project.created
 
 management:
   metrics:
