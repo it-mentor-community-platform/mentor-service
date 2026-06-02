@@ -13,7 +13,9 @@ spring:
     topic:
       auth-user-authenticated: auth.user.authenticated
       projects-project-created: projects.project.created
-
+      notification-mentors-project-submitted: notifications.mentors.project.submitted
+  jpa:
+    show-sql: true
 management:
   metrics:
     tags:
