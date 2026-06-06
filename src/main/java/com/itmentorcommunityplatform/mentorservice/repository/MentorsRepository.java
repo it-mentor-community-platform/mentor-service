@@ -1,9 +1,7 @@
 package com.itmentorcommunityplatform.mentorservice.repository;
 
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
-import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorUpsertResult;
-import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -49,4 +47,11 @@ public interface MentorsRepository extends CrudRepository<Mentor, Long> {
 
     Optional<Mentor> getMentorByMentorTelegramUserId(Long mentorTelegramUserId);
 
+    @Query("""
+            SELECT * FROM mentors m
+            LEFT JOIN guaranteed_reviews_prices grp ON m.id = grp.mentor_id
+            WHERE grp.project_type = :projectType AND grp.language = :language
+            """)
+    List<Mentor> findAllMentorsByProgrammingLanguageAndProjectType(@Param("language") String language,
+                                                                @Param("projectType") String projectType);
 }

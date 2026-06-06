@@ -3,13 +3,11 @@ package com.itmentorcommunityplatform.mentorservice.service;
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLanguage;
+import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.domain.type.UpsertResult;
-import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
-import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
-import com.itmentorcommunityplatform.mentorservice.dto.MentorUpsertResult;
-import com.itmentorcommunityplatform.mentorservice.dto.ProfileWithTelegramIdDto;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
+import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ProgrammingLanguagesRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ServicesRepository;
@@ -39,6 +37,7 @@ public class MentorService {
     private final ProgrammingLanguagesRepository programmingLanguagesRepository;
     private final ServicesRepository servicesRepository;
     private final ServiceHttpClient httpClient;
+    private final MentorMapper mentorMapper;
 
     @Transactional
     public UpsertResult upsertMentorAndGuaranteedReviewsPrices(AddPriceForGuaranteedReviewRequest request) {
@@ -56,6 +55,10 @@ public class MentorService {
                 request.language());
 
         return inserted ? UpsertResult.CREATED : UpsertResult.UPDATED;
+    }
+
+    public List<MentorDto> searchMentorsByLanguageAndProjectType(String language, String projectType){
+        return mentorMapper.toMentorDtoList(mentorsRepository.findAllMentorsByProgrammingLanguageAndProjectType(language, projectType));
     }
 
     @Transactional
