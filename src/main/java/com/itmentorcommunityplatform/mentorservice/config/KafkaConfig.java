@@ -36,6 +36,12 @@ public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String BOOTSTRAP_SERVERS;
 
+    @Value("${spring.kafka.listener.auto-startup:true}")
+    private boolean kafkaListenerAutoStartup;
+
+    @Value("${spring.kafka.listener.missing-topics-fatal:true}")
+    private boolean kafkaListenerMissingTopicsFatal;
+
     @Bean
     public RecordMessageConverter multiTypeConverter() {
         StringJsonMessageConverter converter = new StringJsonMessageConverter();
@@ -73,7 +79,8 @@ public class KafkaConfig {
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
-        factory.setMissingTopicsFatal(true);
+        factory.setAutoStartup(kafkaListenerAutoStartup);
+        factory.setMissingTopicsFatal(kafkaListenerMissingTopicsFatal);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
         factory.setRecordMessageConverter(multiTypeConverter());
         return factory;
