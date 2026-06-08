@@ -25,7 +25,7 @@ public class ProjectCreatedConsumer {
     public void consumerProjectCreatedEvent(ProjectCreatedEvent event) {
         log.info("Kafka Consumer: Received user's project create event: {}", event);
         try {
-            List<MentorDto> mentors = mentorService.searchMentorsByLanguageAndProjectType(event.getProgrammingLanguage(), event.getRoadmapProject());
+            List<MentorDto> mentors = mentorService.searchActiveMentorsByLanguageAndProjectType(event.getProgrammingLanguage(), event.getRoadmapProject());
             mentorNotificationProducer.notificateMentors(
                     new MentorNotificationEvent(event, mentors)
             );

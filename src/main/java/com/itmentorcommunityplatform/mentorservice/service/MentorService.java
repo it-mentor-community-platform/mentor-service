@@ -57,8 +57,8 @@ public class MentorService {
         return inserted ? UpsertResult.CREATED : UpsertResult.UPDATED;
     }
 
-    public List<MentorDto> searchMentorsByLanguageAndProjectType(String language, String projectType){
-        return mentorMapper.toMentorDtoList(mentorsRepository.findAllMentorsByProgrammingLanguageAndProjectType(language, projectType));
+    public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType){
+        return mentorMapper.toMentorDtoList(mentorsRepository.findActiveMentorsByProgrammingLanguageAndProjectType(language, projectType));
     }
 
     @Transactional

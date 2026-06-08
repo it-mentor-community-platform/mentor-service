@@ -50,8 +50,10 @@ public interface MentorsRepository extends CrudRepository<Mentor, Long> {
     @Query("""
             SELECT * FROM mentors m
             LEFT JOIN guaranteed_reviews_prices grp ON m.id = grp.mentor_id
-            WHERE grp.project_type = :projectType AND grp.language = :language
+            WHERE grp.project_type = :projectType 
+              AND grp.language = :language 
+              AND m.is_active = TRUE
             """)
-    List<Mentor> findAllMentorsByProgrammingLanguageAndProjectType(@Param("language") String language,
-                                                                @Param("projectType") String projectType);
+    List<Mentor> findActiveMentorsByProgrammingLanguageAndProjectType(@Param("language") String language,
+                                                                      @Param("projectType") String projectType);
 }
