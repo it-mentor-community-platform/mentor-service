@@ -22,5 +22,6 @@ public class ProjectCreatedEvent {
     private String roadmapProject;
     private Long addedTimestamp;
     private DataSourceType projectSourceType;
+    private Long authorTelegramUserId;
 
 }
