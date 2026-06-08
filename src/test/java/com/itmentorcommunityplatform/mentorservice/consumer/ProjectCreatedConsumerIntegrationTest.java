@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -22,29 +22,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 @Testcontainers
-@SpringBootTest(properties = {
-        "spring.kafka.bootstrap-servers=localhost:9092",
-        "spring.kafka.listener.auto-startup=false",
-        "spring.kafka.listener.missing-topics-fatal=false",
-        "spring.kafka.topic.auth-user-authenticated=auth.user.authenticated",
-        "spring.kafka.topic.projects-project-created=projects.project.created",
-        "spring.kafka.topic.notification-mentors-project-submitted=notifications.mentors.project.submitted",
-        "mentorservice.profile-service-base-url=http://localhost:8083"
-})
+@SpringBootTest
+@ActiveProfiles("test")
 class ProjectCreatedConsumerIntegrationTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
-            .withDatabaseName("mentor_service_test")
-            .withUsername("root")
-            .withPassword("password");
-
-    @DynamicPropertySource
-    static void registerPostgresProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
     @Autowired
     private ProjectCreatedConsumer projectCreatedConsumer;

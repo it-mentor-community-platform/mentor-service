@@ -1,0 +1,13 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
+      missing-topics-fatal: false
+    topic:
+      auth-user-authenticated: auth.user.authenticated
+      projects-project-created: projects.project.created
+      notification-mentors-project-submitted: notifications.mentors.project.submitted
+
+mentorservice:
+  profile-service-base-url: http://localhost
