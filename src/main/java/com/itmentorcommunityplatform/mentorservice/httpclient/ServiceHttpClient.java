@@ -1,6 +1,7 @@
 package com.itmentorcommunityplatform.mentorservice.httpclient;
 
 import com.itmentorcommunityplatform.mentorservice.config.MentorServiceProperties;
+import com.itmentorcommunityplatform.mentorservice.dto.CreateProfileRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.ProfileWithTelegramIdDto;
 import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,32 @@ public class ServiceHttpClient {
             log.error("Failed calling profile-service. url={}", telegramUrl, e);
             throw e;
 
+        }
+    }
+
+    public void createProfile(Long telegramUserId, String telegramUrl) {
+        String url = UriComponentsBuilder
+                .fromUriString(properties.getProfileServiceBaseUrl())
+                .path("/api/profile/internal/profile")
+                .toUriString();
+
+        CreateProfileRequest requestBody = new CreateProfileRequest(
+                telegramUserId,
+                new CreateProfileRequest.ProfileDetails(telegramUrl)
+        );
+
+        try {
+            webClient.post()
+                    .uri(url)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+            log.info("Successfully created profile in profile-service for telegramUserId={}", telegramUserId);
+        } catch (Exception e) {
+            failedAttempts.increment();
+            log.error("Error creating profile in profile-service for telegramUserId={}, url={}", telegramUserId, telegramUrl, e);
+            throw e;
         }
     }
 }

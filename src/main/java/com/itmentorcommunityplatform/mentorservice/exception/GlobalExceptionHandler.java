@@ -2,6 +2,8 @@ package com.itmentorcommunityplatform.mentorservice.exception;
 
 import com.itmentorcommunityplatform.mentorservice.dto.ApiMessageResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,5 +48,28 @@ public class GlobalExceptionHandler {
                 .status(e.getStatusCode())
                 .body(new ApiMessageResponse(e.getReason()));
 
+    }
+
+    @ExceptionHandler({DbActionExecutionException.class, DataAccessException.class})
+    public ResponseEntity<ApiMessageResponse> handleDataIntegrityViolationException(Exception e) {
+        Throwable cause = e;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+
+        String rootMessage = cause.getMessage();
+        log.info("Caught data integrity exception with root message: {}", rootMessage);
+
+        if (rootMessage != null && rootMessage.contains("idx_mentors_unique")) {
+            log.warn("Mentor creation conflict: duplicate telegramUserId or url found. Message: {}", rootMessage);
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ApiMessageResponse("Mentor with given telegramUserId already exists"));
+        }
+
+        log.error("Unhandled transaction or data access error", e);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiMessageResponse("Internal server error"));
     }
 }

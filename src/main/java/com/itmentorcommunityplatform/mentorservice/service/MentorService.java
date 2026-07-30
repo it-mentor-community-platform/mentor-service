@@ -62,24 +62,32 @@ public class MentorService {
     }
 
     @Transactional
-    public UpsertResult upsertMentorWithDescription(AddMentorWithDescriptionRequest request) {
+    public void createMentorWithDescription(AddMentorWithDescriptionRequest request) {
         telegramUrlValidator.validate(request.telegramUrl());
 
-        MentorUpsertResult mentorUpsertResult = mentorsRepository.upsertMentor(
-                request.mentorTelegramUserId(),
-                request.telegramUrl());
+        Optional<ProfileWithTelegramIdDto> profileOpt = httpClient.getProfileByTgUrl(request.telegramUrl());
 
-        boolean inserted = mentorUpsertResult.inserted();
+        if (profileOpt.isEmpty()) {
+            try {
+                httpClient.createProfile(request.mentorTelegramUserId(), request.telegramUrl());
+            } catch (Exception e) {
+                log.error("Failed to create profile in profile-service for telegramUserId={}. Interrupting flow.",
+                        request.mentorTelegramUserId(), e);
+                throw e;
+            }
+        }
 
-        Mentor mentor = mentorsRepository.findById(mentorUpsertResult.id()).orElseThrow();
-        mentor.setMentorDescription(buildDescription(request, mentor));
+        Mentor mentor = new Mentor();
+        mentor.setMentorTelegramUserId(request.mentorTelegramUserId());
+        mentor.setTelegramUrl(request.telegramUrl());
+        mentor.setActive(false);
+
+        mentor.setMentorDescription(buildDescription(request));
         mentor.setProgrammingLanguages(buildLanguages(request.programmingLanguages()));
         mentor.setServices(buildServices(request.services()));
 
         mentorsRepository.save(mentor);
-        log.info("Mentor with telegram url: {} has been upserted", request.telegramUrl());
-
-        return inserted ? UpsertResult.CREATED : UpsertResult.UPDATED;
+        log.info("Mentor with telegram url: {} created successfully", request.telegramUrl());
     }
 
     @Transactional
@@ -116,20 +124,11 @@ public class MentorService {
                 .collect(Collectors.toSet());
     }
 
-    private MentorDescription buildDescription(AddMentorWithDescriptionRequest request, Mentor mentor) {
-        MentorDescription description = mentor.getMentorDescription();
-
-        if (description != null) {
-            description.setMentorUserId(mentor.getId());
-            description.setName(request.description().name());
-            description.setCost(request.description().cost());
-            description.setDescription(request.description().description());
-        } else {
-            description = new MentorDescription();
-            description.setName(request.description().name());
-            description.setCost(request.description().cost());
-            description.setDescription(request.description().description());
-        }
+    private MentorDescription buildDescription(AddMentorWithDescriptionRequest request) {
+        MentorDescription description = new MentorDescription();
+        description.setName(request.description().name());
+        description.setCost(request.description().cost());
+        description.setDescription(request.description().description());
         return description;
     }
 

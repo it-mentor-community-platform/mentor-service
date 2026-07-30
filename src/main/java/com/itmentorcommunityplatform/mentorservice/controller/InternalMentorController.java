@@ -43,19 +43,13 @@ public class InternalMentorController {
 
     @PostMapping("/internal/mentor")
     @PostAddMentorWithDescription
-    public ResponseEntity<ApiMessageResponse> upsertMentorWithDescription(
+    public ResponseEntity<ApiMessageResponse> createMentorWithDescription(
             @RequestBody @Valid AddMentorWithDescriptionRequest request) {
 
-        UpsertResult upsertResult = mentorService.upsertMentorWithDescription(request);
+            mentorService.createMentorWithDescription(request);
 
-        if (upsertResult.equals(UpsertResult.CREATED)) {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(new ApiMessageResponse("Created successfully"));
-        }
-
-        return ResponseEntity
-                .ok()
-                .body(new ApiMessageResponse("Update successfully"));
     }
 }
