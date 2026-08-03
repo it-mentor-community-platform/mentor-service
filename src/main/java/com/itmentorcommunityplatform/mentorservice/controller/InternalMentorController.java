@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.mentorservice.controller;
 
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddMentorWithDescription;
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddPricesForGuaranteedReviews;
+import com.itmentorcommunityplatform.mentorservice.domain.type.InsertResult;
 import com.itmentorcommunityplatform.mentorservice.domain.type.UpsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
@@ -28,9 +29,9 @@ public class InternalMentorController {
     public ResponseEntity<ApiMessageResponse> addPriceForGuaranteedReview(
             @RequestBody AddPriceForGuaranteedReviewRequest request) {
 
-        UpsertResult upsertResult = mentorService.upsertMentorAndGuaranteedReviewsPrices(request);
+        InsertResult insertResult = mentorService.insertGuaranteedReviewPrice(request);
 
-        if (upsertResult.equals(UpsertResult.CREATED)) {
+        if (insertResult == InsertResult.CREATED) {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(new ApiMessageResponse("Created successfully"));
@@ -38,7 +39,7 @@ public class InternalMentorController {
 
         return ResponseEntity
                 .ok()
-                .body(new ApiMessageResponse("Update successfully"));
+                .body(new ApiMessageResponse("Already exists"));
     }
 
     @PostMapping("/internal/mentor")

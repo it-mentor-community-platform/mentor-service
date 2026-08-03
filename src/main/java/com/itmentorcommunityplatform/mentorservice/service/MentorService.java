@@ -3,6 +3,7 @@ package com.itmentorcommunityplatform.mentorservice.service;
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLanguage;
+import com.itmentorcommunityplatform.mentorservice.domain.type.InsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.domain.type.UpsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
@@ -40,7 +41,7 @@ public class MentorService {
     private final MentorMapper mentorMapper;
 
     @Transactional
-    public UpsertResult upsertMentorAndGuaranteedReviewsPrices(AddPriceForGuaranteedReviewRequest request) {
+    public InsertResult insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
         telegramUrlValidator.validate(request.telegramUrl());
         projectTypeValidator.validate(request.projectType());
 
@@ -48,13 +49,18 @@ public class MentorService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Profile with given Telegram URL not found"));
 
-        mentorsRepository.upsertMentor(responseDto.telegramUserId(), request.telegramUrl());
-        boolean inserted = mentorsRepository.updatePriceForGuaranteedReviews(request.priceUsd(),
+        Mentor mentor = mentorsRepository.getMentorByMentorTelegramUserId(responseDto.telegramUserId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Mentor not found"
+                ));
+
+        boolean inserted = mentorsRepository.insertPriceForGuaranteedReviews(request.priceUsd(),
                 request.projectType(),
-                responseDto.telegramUserId(),
+                mentor.getId(),
                 request.language());
 
-        return inserted ? UpsertResult.CREATED : UpsertResult.UPDATED;
+        return inserted ? InsertResult.CREATED : InsertResult.ALREADY_EXISTS;
     }
 
     public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType){
