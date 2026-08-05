@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.docs;
 
+import com.itmentorcommunityplatform.mentorservice.dto.GuaranteedReviewPriceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,25 +22,16 @@ import java.lang.annotation.Target;
         @ApiResponse(
                 responseCode = "200",
                 description = "Guaranteed review price already exists",
-                content = @Content(
-                        mediaType = "application/json",
-                        schema = @Schema(example = """
-                                        {
-                                          "message": "Already exists"
-                                        }
-                                """)
-                )
+                content = @Content
         ),
         @ApiResponse(
                 responseCode = "201",
                 description = "Guaranteed review price created successfully",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(example = """
-                                       {
-                                         "message": "Created successfully"
-                                       }
-                                """)
+                        schema = @Schema(
+                                implementation = GuaranteedReviewPriceResponse.class
+                        )
                 )
         ),
         @ApiResponse(

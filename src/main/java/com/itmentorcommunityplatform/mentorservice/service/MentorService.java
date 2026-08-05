@@ -3,7 +3,6 @@ package com.itmentorcommunityplatform.mentorservice.service;
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLanguage;
-import com.itmentorcommunityplatform.mentorservice.domain.type.InsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.domain.type.UpsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
@@ -40,8 +39,7 @@ public class MentorService {
     private final ServiceHttpClient httpClient;
     private final MentorMapper mentorMapper;
 
-    @Transactional
-    public InsertResult insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
+    public Optional<Long> insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
         telegramUrlValidator.validate(request.telegramUrl());
         projectTypeValidator.validate(request.projectType());
 
@@ -55,15 +53,17 @@ public class MentorService {
                         "Mentor not found"
                 ));
 
-        boolean inserted = mentorsRepository.insertPriceForGuaranteedReviews(request.priceUsd(),
+        Optional<Long> insertedId = mentorsRepository.insertPriceForGuaranteedReviews(
+                request.priceUsd(),
                 request.projectType(),
                 mentor.getId(),
-                request.language());
+                request.language()
+        );
 
-        return inserted ? InsertResult.CREATED : InsertResult.ALREADY_EXISTS;
+        return insertedId;
     }
 
-    public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType){
+    public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType) {
         return mentorMapper.toMentorDtoList(mentorsRepository.findActiveMentorsByProgrammingLanguageAndProjectType(language, projectType));
     }
 
