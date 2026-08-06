@@ -10,7 +10,7 @@ Content-Type: application/json
 }
 ###
 
-### 200 - Guaranteed review price already exists
+### 409 - Guaranteed review price already exists
 POST http://localhost:8085/api/mentor/internal/guaranteed-review
 Content-Type: application/json
 

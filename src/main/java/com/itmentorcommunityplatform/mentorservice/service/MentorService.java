@@ -6,6 +6,9 @@ import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLangu
 import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.domain.type.UpsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
+import com.itmentorcommunityplatform.mentorservice.exception.GuaranteedReviewPriceAlreadyExistsException;
+import com.itmentorcommunityplatform.mentorservice.exception.MentorNotFoundException;
+import com.itmentorcommunityplatform.mentorservice.exception.ProfileNotFoundException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
@@ -16,10 +19,8 @@ import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidato
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,28 +40,22 @@ public class MentorService {
     private final ServiceHttpClient httpClient;
     private final MentorMapper mentorMapper;
 
-    public Optional<Long> insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
+    public Long insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
         telegramUrlValidator.validate(request.telegramUrl());
         projectTypeValidator.validate(request.projectType());
 
         ProfileWithTelegramIdDto responseDto = httpClient.getProfileByTgUrl(request.telegramUrl())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Profile with given Telegram URL not found"));
+                .orElseThrow(ProfileNotFoundException::new);
 
         Mentor mentor = mentorsRepository.getMentorByMentorTelegramUserId(responseDto.telegramUserId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Mentor not found"
-                ));
+                .orElseThrow(MentorNotFoundException::new);
 
-        Optional<Long> insertedId = mentorsRepository.insertPriceForGuaranteedReviews(
+        return mentorsRepository.insertPriceForGuaranteedReviews(
                 request.priceUsd(),
                 request.projectType(),
                 mentor.getId(),
                 request.language()
-        );
-
-        return insertedId;
+        ).orElseThrow(GuaranteedReviewPriceAlreadyExistsException::new);
     }
 
     public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType) {

@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/mentor")
 @RequiredArgsConstructor
@@ -31,16 +29,11 @@ public class InternalMentorController {
     public ResponseEntity<GuaranteedReviewPriceResponse> addPriceForGuaranteedReview(
             @RequestBody AddPriceForGuaranteedReviewRequest request) {
 
-        Optional<Long> insertId = mentorService.insertGuaranteedReviewPrice(request);
+        Long insertId = mentorService.insertGuaranteedReviewPrice(request);
 
-        if (insertId.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new GuaranteedReviewPriceResponse(insertId.get()));
-        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new GuaranteedReviewPriceResponse(insertId));
 
-        return ResponseEntity
-                .ok()
-                .build();
     }
 
     @PostMapping("/internal/mentor")

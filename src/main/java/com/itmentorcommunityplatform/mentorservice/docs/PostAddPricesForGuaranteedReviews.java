@@ -20,11 +20,6 @@ import java.lang.annotation.Target;
 )
 @ApiResponses({
         @ApiResponse(
-                responseCode = "200",
-                description = "Guaranteed review price already exists",
-                content = @Content
-        ),
-        @ApiResponse(
                 responseCode = "201",
                 description = "Guaranteed review price created successfully",
                 content = @Content(
@@ -68,6 +63,18 @@ import java.lang.annotation.Target;
                                 }
                                 """)
                 )),
+        @ApiResponse(
+                responseCode = "409",
+                description = "Guaranteed review price already exists",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(example = """
+                                {
+                                   "message": "Guaranteed review price already exists"
+                                }
+                                """)
+                )
+        ),
         @ApiResponse(
                 responseCode = "500",
                 description = "Internal server error",
