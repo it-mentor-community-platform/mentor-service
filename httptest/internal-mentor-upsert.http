@@ -1,4 +1,4 @@
-### 1. 201/200-Succefuly created/update
+### 1. 201-Successfully created mentor with description
 POST http://localhost:8085/api/mentor/internal/mentor
 Content-Type: application/json
 
@@ -100,4 +100,20 @@ Content-Type: application/json
     "description": "Мои услуги - https://zhukovsd.it/services/"
   },
   "programmingLanguages": ["Java", "Python", "Kotlin"]
+}
+
+### 8. 409-Conflict (Mentor already exists)
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "mentorTelegramUserId": 123456,
+  "telegramUrl": "https://t.me/zhukovsd",
+  "description": {
+    "name": "Sergey Zhukov",
+    "cost": "PAID",
+    "description": "Мои услуги - https://zhukovsd.it/services/"
+  },
+  "programmingLanguages": ["Java", "Python", "Kotlin"],
+  "services": ["менторство по поиску работы", "консультации"]
 }

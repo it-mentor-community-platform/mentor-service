@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.docs;
 
+import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,11 +24,7 @@ import java.lang.annotation.Target;
                 description = "Resource update successfully",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(example = """
-                                        {
-                                          "message": "Resource update successfully"
-                                        }
-                                """)
+                        schema = @Schema(implementation = MentorResponseDto.class)
                 )
         ),
         @ApiResponse(
@@ -35,11 +32,7 @@ import java.lang.annotation.Target;
                 description = "Resource created successfully",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(example = """
-                                       {
-                                         "message": "Resource created successfully"
-                                       }
-                                """)
+                        schema = @Schema(implementation = MentorResponseDto.class)
                 )
         ),
         @ApiResponse(

@@ -2,10 +2,9 @@ package com.itmentorcommunityplatform.mentorservice.controller;
 
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddMentorWithDescription;
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddPricesForGuaranteedReviews;
-import com.itmentorcommunityplatform.mentorservice.domain.type.UpsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
-import com.itmentorcommunityplatform.mentorservice.dto.ApiMessageResponse;
+import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import com.itmentorcommunityplatform.mentorservice.service.MentorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,31 +24,27 @@ public class InternalMentorController {
 
     @PostMapping("/internal/guaranteed-review")
     @PostAddPricesForGuaranteedReviews
-    public ResponseEntity<ApiMessageResponse> addPriceForGuaranteedReview(
+    public ResponseEntity<MentorResponseDto> addPriceForGuaranteedReview(
             @RequestBody AddPriceForGuaranteedReviewRequest request) {
 
-        UpsertResult upsertResult = mentorService.upsertMentorAndGuaranteedReviewsPrices(request);
+        MentorResponseDto mentorResponseDto = mentorService.upsertMentorAndGuaranteedReviewsPrices(request);
 
-        if (upsertResult.equals(UpsertResult.CREATED)) {
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(new ApiMessageResponse("Created successfully"));
-        }
+        HttpStatus httpStatus = mentorResponseDto.inserted() ? HttpStatus.CREATED : HttpStatus.OK;
 
         return ResponseEntity
-                .ok()
-                .body(new ApiMessageResponse("Update successfully"));
+                .status(httpStatus)
+                .body(mentorResponseDto);
     }
 
     @PostMapping("/internal/mentor")
     @PostAddMentorWithDescription
-    public ResponseEntity<ApiMessageResponse> createMentorWithDescription(
+    public ResponseEntity<MentorResponseDto> createMentorWithDescription(
             @RequestBody @Valid AddMentorWithDescriptionRequest request) {
 
-            mentorService.createMentorWithDescription(request);
+        MentorResponseDto response = mentorService.createMentorWithDescription(request);
 
-            return ResponseEntity
+        return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(new ApiMessageResponse("Created successfully"));
+                    .body(response);
     }
 }

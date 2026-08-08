@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.mentorservice.mapper;
 
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDto;
+import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,4 +20,13 @@ public class MentorMapper {
         return result;
     }
 
+    public MentorResponseDto toMentorResponseDto(Mentor mentor, boolean created) {
+        return new MentorResponseDto(
+                mentor.getId(),
+                mentor.getMentorTelegramUserId(),
+                mentor.getTelegramUrl(),
+                mentor.isActive(),
+                created
+        );
+    }
 }
