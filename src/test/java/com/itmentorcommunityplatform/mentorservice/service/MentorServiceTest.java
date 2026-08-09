@@ -4,6 +4,7 @@ import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionDto;
 import com.itmentorcommunityplatform.mentorservice.dto.ProfileWithTelegramIdDto;
+import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
@@ -17,8 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.relational.core.conversion.DbActionExecutionException;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +47,8 @@ class MentorServiceTest {
     private ServiceHttpClient httpClient;
     @Mock
     private MentorMapper mentorMapper;
+    @Mock
+    private TransactionTemplate transactionTemplate;
 
     @InjectMocks
     private MentorService mentorService;
@@ -60,10 +65,16 @@ class MentorServiceTest {
                 List.of("Java"),
                 List.of("Code Review")
         );
+
+        lenient().when(transactionTemplate.execute(any())).thenAnswer(invocation -> {
+            TransactionCallback<?> action = invocation.getArgument(0);
+            return action.doInTransaction(mock(TransactionStatus.class));
+        });
     }
 
     @Test
     void createMentorWithDescription_whenProfileNotFound_shouldCreateProfileAndMentor() {
+        mockLanguagesAndServices();
         when(httpClient.getProfileByTgUrl(request.telegramUrl())).thenReturn(Optional.empty());
 
         mentorService.createMentorWithDescription(request);
@@ -75,6 +86,7 @@ class MentorServiceTest {
 
     @Test
     void createMentorWithDescription_whenProfileExists_shouldNotCreateProfileAndSaveMentor() {
+        mockLanguagesAndServices();
         ProfileWithTelegramIdDto profileDto = new ProfileWithTelegramIdDto(12345L, null);
         when(httpClient.getProfileByTgUrl(request.telegramUrl())).thenReturn(Optional.of(profileDto));
 
@@ -98,9 +110,20 @@ class MentorServiceTest {
 
     @Test
     void createMentorWithDescription_whenDuplicateKeyInDb_shouldThrowConflictException() {
-        when(httpClient.getProfileByTgUrl(request.telegramUrl())).thenReturn(Optional.of(new ProfileWithTelegramIdDto(12345L, null)));
-        when(mentorsRepository.save(any(Mentor.class))).thenThrow(new DataIntegrityViolationException("Duplicate key"));
+        mockLanguagesAndServices();
+        when(httpClient.getProfileByTgUrl(request.telegramUrl())).thenReturn(Optional.of(
+                new ProfileWithTelegramIdDto(12345L, null)));
 
-        assertThrows(DataIntegrityViolationException.class, () -> mentorService.createMentorWithDescription(request));
+        RuntimeException rootCause = new RuntimeException("duplicate key value violates unique constraint idx_mentors_unique");
+        DbActionExecutionException dbException = new DbActionExecutionException(null, rootCause);
+
+        when(mentorsRepository.save(any(Mentor.class))).thenThrow(dbException);
+
+        assertThrows(MentorDuplicateException.class, () -> mentorService.createMentorWithDescription(request));
+    }
+
+    private void mockLanguagesAndServices() {
+        when(programmingLanguagesRepository.findIdByName("Java")).thenReturn(Optional.of(1L));
+        when(servicesRepository.findIdByName("Code Review")).thenReturn(Optional.of(1L));
     }
 }
