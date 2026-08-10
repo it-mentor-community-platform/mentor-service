@@ -2,11 +2,11 @@ package com.itmentorcommunityplatform.mentorservice.controller;
 
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddMentorWithDescription;
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddPricesForGuaranteedReviews;
+import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import com.itmentorcommunityplatform.mentorservice.domain.type.UpsertResult;
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.ApiMessageResponse;
-import com.itmentorcommunityplatform.mentorservice.dto.GuaranteedReviewPriceResponse;
 import com.itmentorcommunityplatform.mentorservice.service.MentorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +26,13 @@ public class InternalMentorController {
 
     @PostMapping("/internal/guaranteed-review")
     @PostAddPricesForGuaranteedReviews
-    public ResponseEntity<GuaranteedReviewPriceResponse> addPriceForGuaranteedReview(
+    public ResponseEntity<GuaranteedReviewsPrices> addPriceForGuaranteedReview(
             @RequestBody AddPriceForGuaranteedReviewRequest request) {
 
-        Long insertId = mentorService.insertGuaranteedReviewPrice(request);
+        GuaranteedReviewsPrices savedPrice = mentorService.insertGuaranteedReviewPrice(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new GuaranteedReviewPriceResponse(insertId));
+                .body(savedPrice);
 
     }
 

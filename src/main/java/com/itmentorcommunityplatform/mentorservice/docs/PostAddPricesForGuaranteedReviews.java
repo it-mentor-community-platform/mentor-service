@@ -1,6 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.docs;
 
-import com.itmentorcommunityplatform.mentorservice.dto.GuaranteedReviewPriceResponse;
+import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(
-                                implementation = GuaranteedReviewPriceResponse.class
+                                implementation = GuaranteedReviewsPrices.class
                         )
                 )
         ),

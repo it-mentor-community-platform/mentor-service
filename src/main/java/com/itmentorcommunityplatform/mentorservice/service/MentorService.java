@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.service;
 
+import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLanguage;
@@ -11,6 +12,7 @@ import com.itmentorcommunityplatform.mentorservice.exception.MentorNotFoundExcep
 import com.itmentorcommunityplatform.mentorservice.exception.ProfileNotFoundException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
+import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ProgrammingLanguagesRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ServicesRepository;
@@ -18,7 +20,9 @@ import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidato
 import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
+import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,10 +41,11 @@ public class MentorService {
     private final MentorsRepository mentorsRepository;
     private final ProgrammingLanguagesRepository programmingLanguagesRepository;
     private final ServicesRepository servicesRepository;
+    private final GuaranteedReviewsPriceRepository guaranteedReviewsPriceRepository;
     private final ServiceHttpClient httpClient;
     private final MentorMapper mentorMapper;
 
-    public Long insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
+    public GuaranteedReviewsPrices insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
         telegramUrlValidator.validate(request.telegramUrl());
         projectTypeValidator.validate(request.projectType());
 
@@ -50,12 +55,21 @@ public class MentorService {
         Mentor mentor = mentorsRepository.getMentorByMentorTelegramUserId(responseDto.telegramUserId())
                 .orElseThrow(MentorNotFoundException::new);
 
-        return mentorsRepository.insertPriceForGuaranteedReviews(
-                request.priceUsd(),
-                request.projectType(),
-                mentor.getId(),
-                request.language()
-        ).orElseThrow(GuaranteedReviewPriceAlreadyExistsException::new);
+        GuaranteedReviewsPrices price = GuaranteedReviewsPrices.builder()
+                .mentorId(mentor.getId())
+                .projectType(request.projectType())
+                .language(request.language())
+                .priceUsd(request.priceUsd())
+                .build();
+
+        try {
+            return guaranteedReviewsPriceRepository.save(price);
+        } catch (DbActionExecutionException e) {
+            if (e.getCause() instanceof DuplicateKeyException) {
+                throw new GuaranteedReviewPriceAlreadyExistsException();
+            }
+            throw e;
+        }
     }
 
     public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType) {
