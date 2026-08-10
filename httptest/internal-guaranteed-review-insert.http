@@ -1,0 +1,71 @@
+### 201 - Guaranteed review price created
+POST http://localhost:8085/api/mentor/internal/guaranteed-review
+Content-Type: application/json
+
+{
+  "telegram_url": "https://t.me/anelfer",
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 409 - Guaranteed review price already exists
+POST http://localhost:8085/api/mentor/internal/guaranteed-review
+Content-Type: application/json
+
+{
+  "telegram_url": "https://t.me/anelfer",
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 20
+}
+###
+
+### 400-Telegram profile url incorrect
+POST http://localhost:8085/api/mentor/internal/guaranteed-review
+Content-Type: application/json
+
+{
+  "telegram_url": "https://tzhukovsd",
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 400-Invalid project type
+POST http://localhost:8085/api/mentor/internal/guaranteed-review
+Content-Type: application/json
+
+{
+  "telegram_url": "https://t.me/zhukovsd",
+  "language": "Java",
+  "project_type": "MOTION",
+  "price_usd": 10
+}
+###
+
+### 404-Not found profile
+POST http://localhost:8085/api/mentor/internal/guaranteed-review
+Content-Type: application/json
+
+{
+  "telegram_url": "https://t.me/V3rog",
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 404 - Mentor not found
+POST http://localhost:8085/api/mentor/internal/guaranteed-review
+Content-Type: application/json
+
+{
+  "telegram_url": "https://t.me/qwerty0629",
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###

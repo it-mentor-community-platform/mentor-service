@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.docs;
 
+import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,32 +15,18 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-        summary = "Post request for upsert Mentor and Price",
-        description = "Request for upsert table Mentor/Price for guaranteed reviews"
+        summary = "Add price for guaranteed review",
+        description = "Creates a guaranteed review price if it does not exist"
 )
 @ApiResponses({
         @ApiResponse(
-                responseCode = "200",
-                description = "Resource update successfully",
-                content = @Content(
-                        mediaType = "application/json",
-                        schema = @Schema(example = """
-                                        {
-                                          "message": "Resource update successfully"
-                                        }
-                                """)
-                )
-        ),
-        @ApiResponse(
                 responseCode = "201",
-                description = "Resource created successfully",
+                description = "Guaranteed review price created successfully",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(example = """
-                                       {
-                                         "message": "Resource created successfully"
-                                       }
-                                """)
+                        schema = @Schema(
+                                implementation = GuaranteedReviewsPrices.class
+                        )
                 )
         ),
         @ApiResponse(
@@ -67,15 +54,27 @@ import java.lang.annotation.Target;
         ,
         @ApiResponse(
                 responseCode = "404",
-                description = "Telegram url not found",
+                description = "Profile or mentor not found",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(example = """
                                 {
-                                   "message": "Telegram url not found"
+                                   "message": "Mentor not found"
                                 }
                                 """)
                 )),
+        @ApiResponse(
+                responseCode = "409",
+                description = "Guaranteed review price already exists",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(example = """
+                                {
+                                   "message": "Guaranteed review price already exists"
+                                }
+                                """)
+                )
+        ),
         @ApiResponse(
                 responseCode = "500",
                 description = "Internal server error",

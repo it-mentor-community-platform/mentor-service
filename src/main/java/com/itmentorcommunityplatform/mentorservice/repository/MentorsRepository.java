@@ -33,18 +33,6 @@ public interface MentorsRepository extends CrudRepository<Mentor, Long> {
             """)
     Mentor updateMentor(Long telegramUserId, String telegramUrl, boolean isActive);
 
-    @Query("""
-            INSERT INTO guaranteed_reviews_prices (MENTOR_ID, PROJECT_TYPE, LANGUAGE, PRICE_USD)
-                VALUES ((select id from mentors where mentor_telegram_user_id= :telegramUserId), :projectType, :language, :price)
-                ON CONFLICT (mentor_id, project_type, language)
-                DO UPDATE SET price_usd = EXCLUDED.price_usd
-                RETURNING (xmax = 0) AS inserted;
-            """)
-    boolean updatePriceForGuaranteedReviews(@Param("price") int price,
-                                            @Param("projectType") String projectType,
-                                            @Param("telegramUserId") Long telegramUserId,
-                                            @Param("language") String language);
-
     Optional<Mentor> getMentorByMentorTelegramUserId(Long mentorTelegramUserId);
 
     @Query("""
