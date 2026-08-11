@@ -2,6 +2,8 @@ package com.itmentorcommunityplatform.mentorservice.controller;
 
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddMentorWithDescription;
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddPricesForGuaranteedReviews;
+import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
+
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
@@ -24,16 +26,13 @@ public class InternalMentorController {
 
     @PostMapping("/internal/guaranteed-review")
     @PostAddPricesForGuaranteedReviews
-    public ResponseEntity<MentorResponseDto> addPriceForGuaranteedReview(
+    public ResponseEntity<GuaranteedReviewsPrices> addPriceForGuaranteedReview(
             @RequestBody AddPriceForGuaranteedReviewRequest request) {
 
-        MentorResponseDto mentorResponseDto = mentorService.upsertMentorAndGuaranteedReviewsPrices(request);
+        GuaranteedReviewsPrices savedPrice = mentorService.insertGuaranteedReviewPrice(request);
 
-        HttpStatus httpStatus = mentorResponseDto.inserted() ? HttpStatus.CREATED : HttpStatus.OK;
-
-        return ResponseEntity
-                .status(httpStatus)
-                .body(mentorResponseDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(savedPrice);
     }
 
     @PostMapping("/internal/mentor")

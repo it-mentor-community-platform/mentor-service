@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.service;
 
+import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLanguage;
@@ -7,8 +8,12 @@ import com.itmentorcommunityplatform.mentorservice.domain.ProgrammingLanguage;
 import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
+import com.itmentorcommunityplatform.mentorservice.exception.GuaranteedReviewPriceAlreadyExistsException;
+import com.itmentorcommunityplatform.mentorservice.exception.MentorNotFoundException;
+import com.itmentorcommunityplatform.mentorservice.exception.ProfileNotFoundException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
+import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ProgrammingLanguagesRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ServicesRepository;
@@ -16,13 +21,13 @@ import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidato
 import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.server.ResponseStatusException; ось цей видаляєм
 
 import java.util.List;
 import java.util.Optional;
@@ -39,30 +44,39 @@ public class MentorService {
     private final MentorsRepository mentorsRepository;
     private final ProgrammingLanguagesRepository programmingLanguagesRepository;
     private final ServicesRepository servicesRepository;
+    private final GuaranteedReviewsPriceRepository guaranteedReviewsPriceRepository;
     private final ServiceHttpClient httpClient;
     private final MentorMapper mentorMapper;
     private final TransactionTemplate transactionTemplate;
 
-    public MentorResponseDto upsertMentorAndGuaranteedReviewsPrices(AddPriceForGuaranteedReviewRequest request) {
+    public GuaranteedReviewsPrices insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
         telegramUrlValidator.validate(request.telegramUrl());
         projectTypeValidator.validate(request.projectType());
 
         ProfileWithTelegramIdDto responseDto = httpClient.getProfileByTgUrl(request.telegramUrl())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Profile with given Telegram URL not found"));
+                .orElseThrow(ProfileNotFoundException::new);
 
-        return transactionTemplate.execute(status -> {
-            MentorResponseDto mentorResponseDto = mentorsRepository.upsertMentor(responseDto.telegramUserId(), request.telegramUrl());
-            mentorsRepository.updatePriceForGuaranteedReviews(request.priceUsd(),
-                    request.projectType(),
-                    responseDto.telegramUserId(),
-                    request.language());
+        Mentor mentor = mentorsRepository.getMentorByMentorTelegramUserId(responseDto.telegramUserId())
+                .orElseThrow(MentorNotFoundException::new);
 
-            return mentorResponseDto;
-        });
+        GuaranteedReviewsPrices price = GuaranteedReviewsPrices.builder()
+                .mentorId(mentor.getId())
+                .projectType(request.projectType())
+                .language(request.language())
+                .priceUsd(request.priceUsd())
+                .build();
+
+        try {
+            return guaranteedReviewsPriceRepository.save(price);
+        } catch (DbActionExecutionException e) {
+            if (e.getCause() instanceof DuplicateKeyException) {
+                throw new GuaranteedReviewPriceAlreadyExistsException();
+            }
+            throw e;
+        }
     }
 
-    public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType){
+    public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType) {
         return mentorMapper.toMentorDtoList(mentorsRepository.findActiveMentorsByProgrammingLanguageAndProjectType(language, projectType));
     }
 
