@@ -55,4 +55,12 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(new ApiMessageResponse(e.getMessage()));
     }
+
+    @ExceptionHandler(MentorDuplicateException.class)
+    public ResponseEntity<ApiMessageResponse> handleMentorDuplicateException(MentorDuplicateException e) {
+        log.warn("Mentor creation conflict: {}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ApiMessageResponse(e.getMessage()));
+    }
 }

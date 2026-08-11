@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.docs;
 
+import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,6 +20,14 @@ import java.lang.annotation.Target;
         description = "Creates a guaranteed review price if it does not exist"
 )
 @ApiResponses({
+        @ApiResponse(
+                responseCode = "200",
+                description = "Resource update successfully",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = MentorResponseDto.class)
+                )
+        ),
         @ApiResponse(
                 responseCode = "201",
                 description = "Guaranteed review price created successfully",

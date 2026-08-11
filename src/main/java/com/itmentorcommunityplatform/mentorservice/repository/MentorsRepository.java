@@ -1,7 +1,7 @@
 package com.itmentorcommunityplatform.mentorservice.repository;
 
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
-import com.itmentorcommunityplatform.mentorservice.dto.MentorUpsertResult;
+import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -21,8 +21,8 @@ public interface MentorsRepository extends CrudRepository<Mentor, Long> {
                 is_active   = TRUE
                 RETURNING id, mentor_telegram_user_id, telegram_url, is_active, (xmax = 0) AS inserted;
             """)
-    MentorUpsertResult upsertMentor(@Param("telegramUserId") Long telegramUserId,
-                                    @Param("telegramUrl") String telegramUrl);
+    MentorResponseDto upsertMentor(@Param("telegramUserId") Long telegramUserId,
+                                   @Param("telegramUrl") String telegramUrl);
 
     @Query("""
             UPDATE mentors
