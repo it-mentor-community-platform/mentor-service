@@ -65,7 +65,7 @@ public class ServiceHttpClient {
         );
 
         try {
-            webClient.post()
+            webClient.put()
                     .uri(url)
                     .bodyValue(requestBody)
                     .retrieve()
