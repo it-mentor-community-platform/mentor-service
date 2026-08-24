@@ -52,14 +52,10 @@ class MentorServiceTest {
 
     private AddMentorWithDescriptionRequest request;
 
-    private TelegramUrlValidator telegramUrlValidator;
-
-    private ProjectTypeValidator projectTypeValidator;
-
     @BeforeEach
     void setUp() {
-        telegramUrlValidator = new TelegramUrlValidator();
-        projectTypeValidator = new ProjectTypeValidator();
+        TelegramUrlValidator telegramUrlValidator = new TelegramUrlValidator();
+        ProjectTypeValidator projectTypeValidator = new ProjectTypeValidator();
 
         mentorService = new MentorService(
                 telegramUrlValidator,
