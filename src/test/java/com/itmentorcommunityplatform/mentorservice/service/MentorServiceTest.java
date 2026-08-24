@@ -7,6 +7,7 @@ import com.itmentorcommunityplatform.mentorservice.dto.ProfileWithTelegramIdDto;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
+import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ProgrammingLanguagesRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ServicesRepository;
@@ -15,7 +16,6 @@ import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidato
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
@@ -34,10 +34,6 @@ import static org.mockito.Mockito.*;
 class MentorServiceTest {
 
     @Mock
-    private TelegramUrlValidator telegramUrlValidator;
-    @Mock
-    private ProjectTypeValidator projectTypeValidator;
-    @Mock
     private MentorsRepository mentorsRepository;
     @Mock
     private ProgrammingLanguagesRepository programmingLanguagesRepository;
@@ -49,14 +45,34 @@ class MentorServiceTest {
     private MentorMapper mentorMapper;
     @Mock
     private TransactionTemplate transactionTemplate;
+    @Mock
+    private GuaranteedReviewsPriceRepository guaranteedReviewsPriceRepository;
 
-    @InjectMocks
     private MentorService mentorService;
 
     private AddMentorWithDescriptionRequest request;
 
+    private TelegramUrlValidator telegramUrlValidator;
+
+    private ProjectTypeValidator projectTypeValidator;
+
     @BeforeEach
     void setUp() {
+        telegramUrlValidator = new TelegramUrlValidator();
+        projectTypeValidator = new ProjectTypeValidator();
+
+        mentorService = new MentorService(
+                telegramUrlValidator,
+                projectTypeValidator,
+                mentorsRepository,
+                programmingLanguagesRepository,
+                servicesRepository,
+                guaranteedReviewsPriceRepository,
+                httpClient,
+                mentorMapper,
+                transactionTemplate
+        );
+
         MentorDescriptionDto descriptionDto = new MentorDescriptionDto("Peter Parker", "100", "Description");
         request = new AddMentorWithDescriptionRequest(
                 12345L,
@@ -79,7 +95,6 @@ class MentorServiceTest {
 
         mentorService.createMentorWithDescription(request);
 
-        verify(telegramUrlValidator).validate(request.telegramUrl());
         verify(httpClient).createProfile(request.mentorTelegramUserId(), request.telegramUrl());
         verify(mentorsRepository).save(any(Mentor.class));
     }
@@ -92,7 +107,6 @@ class MentorServiceTest {
 
         mentorService.createMentorWithDescription(request);
 
-        verify(telegramUrlValidator).validate(request.telegramUrl());
         verify(httpClient, never()).createProfile(any(), any());
         verify(mentorsRepository).save(any(Mentor.class));
     }
@@ -120,6 +134,30 @@ class MentorServiceTest {
         when(mentorsRepository.save(any(Mentor.class))).thenThrow(dbException);
 
         assertThrows(MentorDuplicateException.class, () -> mentorService.createMentorWithDescription(request));
+    }
+
+    @Test
+    void createMentorWithDescription_whenTelegramUrlInvalid_shouldThrowException() {
+        AddMentorWithDescriptionRequest invalidRequest =
+                new AddMentorWithDescriptionRequest(
+                        12345L,
+                        "https://t.me/@test_mentor",
+                        new MentorDescriptionDto(
+                                "Peter Parker",
+                                "100",
+                                "Description"
+                        ),
+                        List.of("Java"),
+                        List.of("Code Review")
+                );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> mentorService.createMentorWithDescription(invalidRequest)
+        );
+
+        verifyNoInteractions(httpClient);
+        verifyNoInteractions(mentorsRepository);
     }
 
     private void mockLanguagesAndServices() {
