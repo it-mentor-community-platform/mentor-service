@@ -46,6 +46,18 @@ Content-Type: application/json
 }
 ###
 
+### 400-Telegram profile url contains invalid character
+POST http://localhost:8085/api/mentor/internal/guaranteed-review
+Content-Type: application/json
+
+{
+  "telegram_url": "https://t.me/@zhukovsd",
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
 ### 404-Not found profile
 POST http://localhost:8085/api/mentor/internal/guaranteed-review
 Content-Type: application/json
