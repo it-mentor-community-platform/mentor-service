@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 @Slf4j
@@ -39,12 +38,29 @@ public class GlobalExceptionHandler {
                 .body(new ApiMessageResponse(e.getBindingResult().getFieldError().getDefaultMessage()));
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ApiMessageResponse> handleStatusException(ResponseStatusException e) {
-
+    @ExceptionHandler({
+            MentorNotFoundException.class,
+            ProfileNotFoundException.class
+    })
+    public ResponseEntity<ApiMessageResponse> handleNotFoundException(RuntimeException e) {
         return ResponseEntity
-                .status(e.getStatusCode())
-                .body(new ApiMessageResponse(e.getReason()));
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ApiMessageResponse(e.getMessage()));
+    }
 
+    @ExceptionHandler(GuaranteedReviewPriceAlreadyExistsException.class)
+    public ResponseEntity<ApiMessageResponse> handleAlreadyExistsException(
+            GuaranteedReviewPriceAlreadyExistsException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ApiMessageResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(MentorDuplicateException.class)
+    public ResponseEntity<ApiMessageResponse> handleMentorDuplicateException(MentorDuplicateException e) {
+        log.warn("Mentor creation conflict: {}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ApiMessageResponse(e.getMessage()));
     }
 }

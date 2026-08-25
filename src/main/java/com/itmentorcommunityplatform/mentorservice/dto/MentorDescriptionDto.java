@@ -9,7 +9,6 @@ public record MentorDescriptionDto(
         @NotBlank(message = "Description cost is required")
         String cost,
 
-        @NotBlank(message = "Description is required")
         String description
 ) {
 }

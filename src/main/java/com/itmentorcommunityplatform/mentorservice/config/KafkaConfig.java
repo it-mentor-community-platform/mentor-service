@@ -1,16 +1,19 @@
 package com.itmentorcommunityplatform.mentorservice.config;
 
+import com.itmentorcommunityplatform.mentorservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.converter.RecordMessageConverter;
 import org.springframework.kafka.support.converter.StringJsonMessageConverter;
@@ -18,6 +21,7 @@ import org.springframework.kafka.support.mapping.DefaultJackson2JavaTypeMapper;
 import org.springframework.kafka.support.mapping.Jackson2JavaTypeMapper;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +33,15 @@ public class KafkaConfig {
 
     private final KafkaProperties kafkaProperties;
 
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String BOOTSTRAP_SERVERS;
+
+    @Value("${spring.kafka.listener.auto-startup:true}")
+    private boolean kafkaListenerAutoStartup;
+
+    @Value("${spring.kafka.listener.missing-topics-fatal:true}")
+    private boolean kafkaListenerMissingTopicsFatal;
+
     @Bean
     public RecordMessageConverter multiTypeConverter() {
         StringJsonMessageConverter converter = new StringJsonMessageConverter();
@@ -37,9 +50,19 @@ public class KafkaConfig {
         typeMapper.addTrustedPackages("*");
         Map<String, Class<?>> mappings = new HashMap<>();
         mappings.put("com.itmentorcommunityplatform.authservice.kafka.UserAuthenticatedEvent", UserAuthenticatedEvent.class);
+        mappings.put("com.itmentorcommunityplatform.projectservice.kafka.ProjectCreatedEvent", ProjectCreatedEvent.class);
         typeMapper.setIdClassMapping(mappings);
         converter.setTypeMapper(typeMapper);
         return converter;
+    }
+
+    @Bean
+    public ProducerFactory<String, Object> producerFactory(){
+        Map<String, Object> config = new HashMap<>();
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(config);
     }
 
     @Bean
@@ -56,9 +79,15 @@ public class KafkaConfig {
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
-        factory.setMissingTopicsFatal(true);
+        factory.setAutoStartup(kafkaListenerAutoStartup);
+        factory.setMissingTopicsFatal(kafkaListenerMissingTopicsFatal);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
         factory.setRecordMessageConverter(multiTypeConverter());
         return factory;
+    }
+
+    @Bean
+    public KafkaTemplate<String, Object> kafkaTemplate(){
+        return new KafkaTemplate<>(producerFactory());
     }
 }

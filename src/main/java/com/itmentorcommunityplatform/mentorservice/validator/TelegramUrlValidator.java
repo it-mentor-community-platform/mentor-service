@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 @Component
 public class TelegramUrlValidator {
-    private static final Pattern TELEGRAM_PATTERN = Pattern.compile("^https://t\\.me/[^\\s/]+$");
+    private static final Pattern TELEGRAM_PATTERN = Pattern.compile("^https://t\\.me/[A-Za-z0-9_]+$");
 
     public void validate(String value) {
         if (value == null || !TELEGRAM_PATTERN.matcher(value).matches()) {

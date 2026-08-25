@@ -9,6 +9,8 @@ spring:
     bootstrap-servers: kafka:9092
     topic:
       auth-user-authenticated: auth.user.authenticated
+      projects-project-created: projects.project.created
+      notification-mentors-project-submitted: notifications.mentors.project.submitted
 
 mentorservice:
   profile-service-base-url: "http://profile-service:8080"
