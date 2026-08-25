@@ -8,6 +8,7 @@ spring:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     topic:
       auth-user-authenticated: staging.auth.user.authenticated
+      projects-project-created: projects.project.created
       notification-mentors-project-submitted: staging.notifications.mentors.project.submitted
     properties:
       security.protocol: ${KAFKA_SECURITY_PROTOCOL}
