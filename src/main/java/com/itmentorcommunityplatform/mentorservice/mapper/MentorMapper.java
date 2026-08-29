@@ -3,6 +3,7 @@ package com.itmentorcommunityplatform.mentorservice.mapper;
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionDto;
+import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionResponseDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import org.jspecify.annotations.NonNull;
@@ -28,16 +29,25 @@ public class MentorMapper {
                 mentor.getId(),
                 mentor.getMentorTelegramUserId(),
                 mentor.getTelegramUrl(),
+                mapDescriptionToDto(mentor.getMentorDescription()),
                 mentor.isActive(),
                 created
         );
     }
 
-    public @NonNull MentorDescriptionDto mapDescription(MentorDescription oldDescription) {
+    public @NonNull MentorDescriptionDto mapDescription(MentorDescription description) {
         return new MentorDescriptionDto(
-                oldDescription.getName(),
-                oldDescription.getCost(),
-                oldDescription.getDescription()
+                description.getName(),
+                description.getCost(),
+                description.getDescription()
+        );
+    }
+
+    private MentorDescriptionResponseDto mapDescriptionToDto(MentorDescription description) {
+        return new MentorDescriptionResponseDto(
+                description.getName(),
+                description.getCost(),
+                description.getDescription()
         );
     }
 }

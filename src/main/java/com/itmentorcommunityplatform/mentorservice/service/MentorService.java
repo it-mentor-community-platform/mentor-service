@@ -209,14 +209,18 @@ public class MentorService {
     }
 
     private static void validMentorDescription(MentorDescriptionDto mentorDescriptionDtoNew) {
-        if (mentorDescriptionDtoNew.name() == null &&
-                mentorDescriptionDtoNew.cost() == null &&
-                mentorDescriptionDtoNew.description() == null) {
+        if (isValueNullOrBlank(mentorDescriptionDtoNew.name()) &&
+                isValueNullOrBlank(mentorDescriptionDtoNew.cost()) &&
+                isValueNullOrBlank(mentorDescriptionDtoNew.description())) {
             throw new MentorDescriptionEmptyException("Mentor description is empty!");
         }
     }
 
     private static String coalesce(String newValue, String oldValue) {
-        return newValue == null ? oldValue : newValue;
+        return isValueNullOrBlank(newValue) ? oldValue : newValue;
+    }
+
+    private static boolean isValueNullOrBlank(String value) {
+        return value == null || value.isBlank();
     }
 }

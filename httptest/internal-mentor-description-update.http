@@ -1,11 +1,12 @@
 
 ### 0. 201 created mentor with description and save
+### ментор с таким telegramId не должен существовать
 POST http://localhost:8085/api/mentor/internal/mentor
 Content-Type: application/json
 
 {
-  "mentorTelegramUserId": 123456,
-  "telegramUrl": "https://t.me/zhukovsd",
+  "mentorTelegramUserId": 12345678911,
+  "telegramUrl": "https://t.me/zhukovsd_1_test",
   "description": {
     "name": "Sergey Zhukov",
     "cost": "PAID",
@@ -23,7 +24,7 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("mentorTelegramUserId", response.body.mentorTelegramUserId);
+    client.global.set("mentorTelegramUserId", String(response.body.mentorTelegramUserId));
 %}
 
 
