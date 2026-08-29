@@ -1,9 +1,11 @@
 package com.itmentorcommunityplatform.mentorservice.docs;
 
+import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
@@ -16,7 +18,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
         summary = "Post request for create Mentor with description",
-        description = "Request to insert into tables Mentor, Mentor/Descriptions, Mentor/Programming languages, and Mentor/Services")
+        description = "Request to insert into tables Mentor, Mentor/Descriptions, Mentor/Programming languages, and Mentor/Services",
+        requestBody = @RequestBody(
+                required = true,
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = AddMentorWithDescriptionRequest.class)
+                )
+        )
+)
 
 @ApiResponses({
         @ApiResponse(responseCode = "201",
