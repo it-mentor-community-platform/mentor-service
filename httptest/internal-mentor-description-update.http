@@ -5,7 +5,7 @@ POST http://localhost:8085/api/mentor/internal/mentor
 Content-Type: application/json
 
 {
-  "mentorTelegramUserId": 12345678911,
+  "mentorTelegramUserId": 12345678914,
   "telegramUrl": "https://t.me/zhukovsd_1_test",
   "description": {
     "name": "Sergey Zhukov",
@@ -24,6 +24,10 @@ Content-Type: application/json
 }
 
 > {%
+    client.test("Status is 201", function () {
+        client.assert(response.status === 201, "Expected 201, got " + response.status);
+    });
+
     client.global.set("mentorTelegramUserId", String(response.body.mentorTelegramUserId));
 %}
 
@@ -95,7 +99,7 @@ X-Telegram-User-Id: {{mentorTelegramUserId}}
 {
   "name": "",
   "cost": "",
-  "description": "Мои услуги - https://zhukovsd.it/services/"
+  "description": "Мои услуги - https://vk.com/"
 }
 
 
@@ -107,6 +111,10 @@ X-Telegram-User-Id: {{mentorTelegramUserId}}
     client.test("Name was not erased", function () {
         client.assert(response.body.description.name === "Sergey Zhukov",
             "Expected name to stay 'Sergey Zhukov', got: " + response.body.description.name);
+        client.assert(response.body.description.cost === "FREE",
+            "Expected cost to stay 'FREE', got: " + response.body.description.cost);
+        client.assert(response.body.description.description === "Мои услуги - https://vk.com/",
+            "Expected cost to stay 'Мои услуги - https://vk.com/', got: " + response.body.description.description);
     });
 %}
 
