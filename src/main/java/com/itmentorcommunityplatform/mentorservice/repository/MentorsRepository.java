@@ -33,8 +33,6 @@ public interface MentorsRepository extends CrudRepository<Mentor, Long> {
             """)
     Mentor updateMentor(Long telegramUserId, String telegramUrl, boolean isActive);
 
-    Optional<Mentor> getMentorByMentorTelegramUserId(Long mentorTelegramUserId);
-
     @Query("""
             SELECT * FROM mentors m
             LEFT JOIN guaranteed_reviews_prices grp ON m.id = grp.mentor_id
@@ -44,4 +42,6 @@ public interface MentorsRepository extends CrudRepository<Mentor, Long> {
             """)
     List<Mentor> findActiveMentorsByProgrammingLanguageAndProjectType(@Param("language") String language,
                                                                       @Param("projectType") String projectType);
+
+    Optional<Mentor> findByMentorTelegramUserId(Long mentorTelegramUserId);
 }

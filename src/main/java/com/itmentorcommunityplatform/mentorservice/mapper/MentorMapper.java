@@ -1,8 +1,11 @@
 package com.itmentorcommunityplatform.mentorservice.mapper;
 
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
+import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
+import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -27,6 +30,14 @@ public class MentorMapper {
                 mentor.getTelegramUrl(),
                 mentor.isActive(),
                 created
+        );
+    }
+
+    public @NonNull MentorDescriptionDto mapDescription(MentorDescription oldDescription) {
+        return new MentorDescriptionDto(
+                oldDescription.getName(),
+                oldDescription.getCost(),
+                oldDescription.getDescription()
         );
     }
 }

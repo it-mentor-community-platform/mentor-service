@@ -22,8 +22,12 @@ public class GlobalExceptionHandler {
                 .body(new ApiMessageResponse("Internal server error"));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiMessageResponse> illegalArgumentExceptionHandler(IllegalArgumentException e) {
+    @ExceptionHandler({
+            IllegalArgumentException.class,
+            InvalidTelegramIdException.class,
+            AbsentTelegramIdException.class
+    })
+    public ResponseEntity<ApiMessageResponse> illegalArgumentExceptionHandler(RuntimeException e) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
