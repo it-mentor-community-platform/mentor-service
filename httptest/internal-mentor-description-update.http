@@ -1,0 +1,133 @@
+
+### 0. 201 created mentor with description and save
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "mentorTelegramUserId": 123456,
+  "telegramUrl": "https://t.me/zhukovsd",
+  "description": {
+    "name": "Sergey Zhukov",
+    "cost": "PAID",
+    "description": "Мои услуги - https://zhukovsd.it/services/"
+  },
+  "programmingLanguages": [
+    "Java",
+    "Python",
+    "Kotlin"
+  ],
+  "services": [
+    "менторство по поиску работы",
+    "консультации"
+  ]
+}
+
+> {%
+    client.global.set("mentorTelegramUserId", response.body.mentorTelegramUserId);
+%}
+
+
+
+### 1. 200-Successfully created mentor with description
+PATCH http://localhost:8085/api/mentor/mentor/description
+Content-Type: application/json
+X-Telegram-User-Id: {{mentorTelegramUserId}}
+
+{
+  "name": "Sergey Zhukov",
+  "cost": "FREE",
+  "description": "Мои услуги - https://zhukovsd.it/services/"
+}
+
+> {%
+    client.test("Status is 200", function () {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Description matches request", function () {
+        client.assert(response.body.description.name === "Sergey Zhukov", "Wrong name");
+        client.assert(response.body.description.cost === "FREE", "Wrong cost");
+    });
+%}
+
+### 2. 400-validation failed (Description is required)
+PATCH http://localhost:8085/api/mentor/mentor/description
+Content-Type: application/json
+
+{
+}
+
+> {%
+    client.test("Status is 400", function () {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+%}
+
+
+### 3. 400-validation failed (Failed parse TelegramId)
+PATCH http://localhost:8085/api/mentor/mentor/description
+Content-Type: application/json
+X-Telegram-User-Id: ыы1234
+
+{
+  "name": "name",
+  "cost": "PAID",
+  "description": "Мои услуги - https://zhukovsd.it/services/"
+}
+
+> {%
+    client.test("Status is 400", function () {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+
+    client.test("Error message mentions invalid id", function () {
+        client.assert(response.body.message.includes("numeric"),
+            "Unexpected message: " + response.body.message);
+    });
+%}
+
+### 4. Empty fields do not erase the old ones
+PATCH http://localhost:8085/api/mentor/mentor/description
+Content-Type: application/json
+X-Telegram-User-Id: {{mentorTelegramUserId}}
+
+{
+  "name": "",
+  "cost": "",
+  "description": "Мои услуги - https://zhukovsd.it/services/"
+}
+
+
+> {%
+    client.test("Status is 200", function () {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Name was not erased", function () {
+        client.assert(response.body.description.name === "Sergey Zhukov",
+            "Expected name to stay 'Sergey Zhukov', got: " + response.body.description.name);
+    });
+%}
+
+
+### 5. 404 failed (Mentor is not found)
+PATCH http://localhost:8085/api/mentor/mentor/description
+Content-Type: application/json
+X-Telegram-User-Id: 1234
+
+{
+  "name": "",
+  "description": "Мои услуги - https://zhukovsd.it/services/"
+}
+
+> {%
+    client.test("Status is 404", function () {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+    });
+
+    client.test("Error message is correct", function () {
+        client.assert(response.body.message === "Mentor not found!",
+            "Unexpected message: " + response.body.message);
+    });
+%}
+
