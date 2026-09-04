@@ -24,8 +24,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             IllegalArgumentException.class,
-            InvalidTelegramIdException.class,
-            AbsentTelegramIdException.class
+            InvalidTelegramIdException.class
     })
     public ResponseEntity<ApiMessageResponse> illegalArgumentExceptionHandler(RuntimeException e) {
 

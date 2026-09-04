@@ -8,10 +8,8 @@ import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionR
 import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
-import com.itmentorcommunityplatform.mentorservice.exception.AbsentTelegramIdException;
 import com.itmentorcommunityplatform.mentorservice.exception.InvalidTelegramIdException;
 import com.itmentorcommunityplatform.mentorservice.service.MentorService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -53,13 +51,8 @@ public class InternalMentorController {
     @PatchUpdateMentorDescription
     public ResponseEntity<MentorResponseDto> patchMentorWithDescription(
             @RequestBody MentorDescriptionDto request,
-            HttpServletRequest httpServletRequest
+            @RequestHeader("X-Telegram-User-Id") String telegramId
     ) {
-
-        String telegramId = httpServletRequest.getHeader("X-Telegram-User-Id");
-
-        validTelegramId(telegramId);
-
         Long parsedTelegramId = parseTelegramIdFromString(telegramId);
 
         MentorResponseDto response = mentorService.updateMentorWithDescription(
@@ -68,18 +61,11 @@ public class InternalMentorController {
         return ResponseEntity.ok(response);
     }
 
-    private void validTelegramId(String telegramId) {
-        if (telegramId == null || telegramId.isBlank()) {
-            throw new AbsentTelegramIdException("X-Telegram-User-Id header absent!");
-        }
-    }
-
-
     private @NonNull Long parseTelegramIdFromString(String telegramId) {
         try {
             return Long.valueOf(telegramId);
         } catch (NumberFormatException e) {
-            throw new InvalidTelegramIdException("X-Telegram-User-Id must be numeric!");
+            throw new InvalidTelegramIdException("X-Telegram-User-Id must be valid numeric!");
         }
     }
 }
