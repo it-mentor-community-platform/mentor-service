@@ -24,14 +24,13 @@ public class MentorMapper {
         return result;
     }
 
-    public MentorResponseDto toMentorResponseDto(Mentor mentor, boolean created) {
+    public MentorResponseDto toMentorResponseDto(Mentor mentor) {
         return new MentorResponseDto(
                 mentor.getId(),
                 mentor.getMentorTelegramUserId(),
                 mentor.getTelegramUrl(),
                 mapDescriptionToDto(mentor.getMentorDescription()),
-                mentor.isActive(),
-                created
+                mentor.isActive()
         );
     }
 

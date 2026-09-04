@@ -5,7 +5,6 @@ public record MentorResponseDto(
         Long mentorTelegramUserId,
         String telegramUrl,
         MentorDescriptionResponseDto description,
-        boolean isActive,
-        boolean inserted
+        boolean isActive
 ) {
 }
