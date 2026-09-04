@@ -14,6 +14,7 @@ import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsP
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ProgrammingLanguagesRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ServicesRepository;
+import com.itmentorcommunityplatform.mentorservice.validator.MentorProgrammingLanguageValidator;
 import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidator;
 import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidator;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class MentorService {
 
     private final TelegramUrlValidator telegramUrlValidator;
     private final ProjectTypeValidator projectTypeValidator;
+    private final MentorProgrammingLanguageValidator mentorProgrammingLanguageValidator;
     private final MentorsRepository mentorsRepository;
     private final ProgrammingLanguagesRepository programmingLanguagesRepository;
     private final ServicesRepository servicesRepository;
@@ -186,6 +188,7 @@ public class MentorService {
             Integer priceUsd
     ) {
         projectTypeValidator.validate(projectType);
+        mentorProgrammingLanguageValidator.validate(mentor, language);
 
         GuaranteedReviewsPrices price = GuaranteedReviewsPrices.builder()
                 .mentorId(mentor.getId())
