@@ -74,9 +74,9 @@ public class GlobalExceptionHandler {
                 .body(new ApiMessageResponse(e.getMessage()));
     }
 
-    @ExceptionHandler(UserIsNotMentorException.class)
+    @ExceptionHandler(MissingMentorRoleException.class)
     public ResponseEntity<ApiMessageResponse> handleForbiddenException(
-            UserIsNotMentorException e
+            MissingMentorRoleException e
     ) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)

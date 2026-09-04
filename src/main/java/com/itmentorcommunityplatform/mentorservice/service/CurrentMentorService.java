@@ -3,7 +3,7 @@ package com.itmentorcommunityplatform.mentorservice.service;
 import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.dto.AddGuaranteedReviewPriceRequest;
-import com.itmentorcommunityplatform.mentorservice.exception.UserIsNotMentorException;
+import com.itmentorcommunityplatform.mentorservice.exception.MissingMentorRoleException;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class CurrentMentorService {
     ) {
         Mentor mentor = mentorsRepository
                 .getMentorByMentorTelegramUserId(telegramUserId)
-                .orElseThrow(UserIsNotMentorException::new);
+                .orElseThrow(MissingMentorRoleException::new);
 
         return guaranteedReviewPriceService.save(
                 mentor,

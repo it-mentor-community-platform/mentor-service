@@ -3,7 +3,7 @@ package com.itmentorcommunityplatform.mentorservice.controller;
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddGuaranteedReviewPrice;
 import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import com.itmentorcommunityplatform.mentorservice.dto.AddGuaranteedReviewPriceRequest;
-import com.itmentorcommunityplatform.mentorservice.exception.UserIsNotMentorException;
+import com.itmentorcommunityplatform.mentorservice.exception.MissingMentorRoleException;
 import com.itmentorcommunityplatform.mentorservice.service.CurrentMentorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class MentorController {
             @RequestBody @Valid AddGuaranteedReviewPriceRequest request) {
 
         if (!roles.contains(MENTOR_ROLE)) {
-            throw new UserIsNotMentorException();
+            throw new MissingMentorRoleException();
         }
 
         GuaranteedReviewsPrices savedPrice =

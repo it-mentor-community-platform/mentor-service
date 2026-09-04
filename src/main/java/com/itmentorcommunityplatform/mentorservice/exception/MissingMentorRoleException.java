@@ -1,8 +1,8 @@
 package com.itmentorcommunityplatform.mentorservice.exception;
 
-public class UserIsNotMentorException extends RuntimeException {
+public class MissingMentorRoleException extends RuntimeException {
 
-    public UserIsNotMentorException() {
+    public MissingMentorRoleException() {
         super("Current user is not a mentor");
     }
 }
