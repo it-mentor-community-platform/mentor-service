@@ -40,10 +40,10 @@ import java.lang.annotation.Target;
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(example = """
-                        {
-                          "message": "Description name is required"
-                        }
-                        """)
+                                {
+                                  "message": "Description name is required"
+                                }
+                                """)
                 )),
         @ApiResponse(responseCode = "409",
                 description = "Mentor already exists",

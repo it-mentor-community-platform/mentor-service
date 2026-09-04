@@ -8,4 +8,5 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 public record ProfileWithTelegramIdDto(
         Long telegramUserId,
         ProfileDetailsDto details
-) {}
+) {
+}

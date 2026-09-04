@@ -12,19 +12,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiMessageResponse> handleAnyException(Exception e) {
-
-        log.error("Unexpected error", e);
-
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiMessageResponse("Internal server error"));
-    }
-
     @ExceptionHandler({
             IllegalArgumentException.class,
-            InvalidTelegramIdException.class
+            InvalidTelegramIdException.class,
+            MentorDescriptionEmptyException.class
     })
     public ResponseEntity<ApiMessageResponse> illegalArgumentExceptionHandler(RuntimeException e) {
 
@@ -40,6 +31,16 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ApiMessageResponse(e.getBindingResult().getFieldError().getDefaultMessage()));
     }
+
+
+    @ExceptionHandler(MentorDoesNotExistException.class)
+    public ResponseEntity<ApiMessageResponse> methodArgumentNotValidExceptionHandler(MentorNotFoundException e) {
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ApiMessageResponse(e.getMessage()));
+    }
+
 
     @ExceptionHandler({
             MentorNotFoundException.class,
@@ -66,4 +67,15 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(new ApiMessageResponse(e.getMessage()));
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiMessageResponse> handleAnyException(Exception e) {
+
+        log.error("Unexpected error", e);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiMessageResponse("Internal server error"));
+    }
+
 }

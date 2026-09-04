@@ -1,6 +1,7 @@
 package com.itmentorcommunityplatform.mentorservice.repository;
 
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
+import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -44,4 +45,19 @@ public interface MentorsRepository extends CrudRepository<Mentor, Long> {
                                                                       @Param("projectType") String projectType);
 
     Optional<Mentor> findByMentorTelegramUserId(Long mentorTelegramUserId);
+
+    @Query("""
+                UPDATE mentor_descriptions md
+                SET name = COALESCE(:name, md.name),
+                    cost = COALESCE(:cost, md.cost),
+                    description = COALESCE(:description, md.description)
+                FROM mentors m
+                WHERE md.mentor_user_id = m.id
+                          AND m.mentor_telegram_user_id = :telegramUserId
+                RETURNING md.name, md.cost, md.description;
+            """)
+    Optional<MentorDescription> updateMentorDescription(@Param("telegramUserId") Long telegramUserId,
+                                                        @Param("name") String name,
+                                                        @Param("cost") String cost,
+                                                        @Param("description") String description);
 }

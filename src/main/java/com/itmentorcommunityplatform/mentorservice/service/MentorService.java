@@ -7,8 +7,8 @@ import com.itmentorcommunityplatform.mentorservice.domain.ProgrammingLanguage;
 import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDescriptionEmptyException;
+import com.itmentorcommunityplatform.mentorservice.exception.MentorDoesNotExistException;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
-import com.itmentorcommunityplatform.mentorservice.exception.MentorNotFoundException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
@@ -43,6 +43,26 @@ public class MentorService {
     private final MentorMapper mentorMapper;
     private final TransactionTemplate transactionTemplate;
 
+    private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {
+        return event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank() ?
+                "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
+    }
+
+    private static void validMentorDescription(MentorDescriptionDto mentorDescriptionDtoNew) {
+        if (isValueNullOrBlank(mentorDescriptionDtoNew.name()) &&
+                isValueNullOrBlank(mentorDescriptionDtoNew.cost()) &&
+                isValueNullOrBlank(mentorDescriptionDtoNew.description())) {
+            throw new MentorDescriptionEmptyException("Mentor description is empty!");
+        }
+    }
+
+    private static String coalesce(String newValue, String oldValue) {
+        return isValueNullOrBlank(newValue) ? oldValue : newValue;
+    }
+
+    private static boolean isValueNullOrBlank(String value) {
+        return value == null || value.isBlank();
+    }
 
     public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType) {
         return mentorMapper.toMentorDtoList(mentorsRepository.findActiveMentorsByProgrammingLanguageAndProjectType(language, projectType));
@@ -78,24 +98,18 @@ public class MentorService {
         });
     }
 
-
     @Transactional
-    public MentorResponseDto updateMentorWithDescription(Long telegramId, MentorDescriptionDto requestDescription) {
+    public MentorDescriptionResponseDto updateMentorDescription(Long telegramId, MentorDescriptionDto requestDescription) {
         validMentorDescription(requestDescription);
 
-        Mentor mentor = mentorsRepository.findByMentorTelegramUserId(telegramId).orElseThrow(() ->
-                new MentorNotFoundException("Mentor not found!")
-        );
+        MentorDescription updatedMentorDescription = mentorsRepository.updateMentorDescription(telegramId,
+                requestDescription.name(),
+                requestDescription.cost(),
+                requestDescription.description()
+        ).orElseThrow(() -> new MentorDoesNotExistException("Mentor with this telegramId not found!"));
 
-        MentorDescriptionDto oldDescriptionDto = mentorMapper.mapDescription(
-                mentor.getMentorDescription());
-
-        mentor.setMentorDescription(
-                updateDescription(requestDescription, oldDescriptionDto));
-
-        Mentor savedMentor = saveMentorOrThrowIfDuplicate(mentor);
-        log.info("Mentor with telegram url: {} updated successfully", mentor.getTelegramUrl());
-        return mentorMapper.toMentorResponseDto(savedMentor);
+        log.info("Mentor with name: {} updated successfully", updatedMentorDescription.getName());
+        return mentorMapper.mapDescriptionToDto(updatedMentorDescription);
     }
 
     @Transactional
@@ -117,7 +131,6 @@ public class MentorService {
         Mentor updated = mentorsRepository.updateMentor(event.getTelegramUserId(), telegramUrl, isActive);
         log.info("Mentor with telegram id: {} has been updated", updated.getMentorTelegramUserId());
     }
-
 
     private Mentor saveMentorOrThrowIfDuplicate(Mentor mentor) {
         try {
@@ -175,27 +188,5 @@ public class MentorService {
             cause = cause.getCause();
         }
         return cause.getMessage();
-    }
-
-
-    private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {
-        return event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank() ?
-                "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
-    }
-
-    private static void validMentorDescription(MentorDescriptionDto mentorDescriptionDtoNew) {
-        if (isValueNullOrBlank(mentorDescriptionDtoNew.name()) &&
-                isValueNullOrBlank(mentorDescriptionDtoNew.cost()) &&
-                isValueNullOrBlank(mentorDescriptionDtoNew.description())) {
-            throw new MentorDescriptionEmptyException("Mentor description is empty!");
-        }
-    }
-
-    private static String coalesce(String newValue, String oldValue) {
-        return isValueNullOrBlank(newValue) ? oldValue : newValue;
-    }
-
-    private static boolean isValueNullOrBlank(String value) {
-        return value == null || value.isBlank();
     }
 }

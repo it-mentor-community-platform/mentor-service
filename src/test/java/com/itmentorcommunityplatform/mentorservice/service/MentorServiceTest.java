@@ -7,11 +7,9 @@ import com.itmentorcommunityplatform.mentorservice.dto.ProfileWithTelegramIdDto;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
-import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ProgrammingLanguagesRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ServicesRepository;
-import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidator;
 import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,25 +43,21 @@ class MentorServiceTest {
     private MentorMapper mentorMapper;
     @Mock
     private TransactionTemplate transactionTemplate;
-    @Mock
-    private GuaranteedReviewsPriceRepository guaranteedReviewsPriceRepository;
 
     private MentorService mentorService;
 
     private AddMentorWithDescriptionRequest request;
 
+    // todo добавить тест на свою ручку и чекнуть че за исключение выпадет при не том id
     @BeforeEach
     void setUp() {
         TelegramUrlValidator telegramUrlValidator = new TelegramUrlValidator();
-        ProjectTypeValidator projectTypeValidator = new ProjectTypeValidator();
 
         mentorService = new MentorService(
                 telegramUrlValidator,
-                projectTypeValidator,
                 mentorsRepository,
                 programmingLanguagesRepository,
                 servicesRepository,
-                guaranteedReviewsPriceRepository,
                 httpClient,
                 mentorMapper,
                 transactionTemplate

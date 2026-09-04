@@ -1,7 +1,7 @@
 package com.itmentorcommunityplatform.mentorservice.docs;
 
-import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
+import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
