@@ -63,4 +63,13 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(new ApiMessageResponse(e.getMessage()));
     }
+
+    @ExceptionHandler(UserIsNotMentorException.class)
+    public ResponseEntity<ApiMessageResponse> handleForbiddenException(
+            UserIsNotMentorException e
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ApiMessageResponse(e.getMessage()));
+    }
 }

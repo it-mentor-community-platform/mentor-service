@@ -7,10 +7,7 @@ import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLangu
 import com.itmentorcommunityplatform.mentorservice.domain.ProgrammingLanguage;
 import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
-import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
-import com.itmentorcommunityplatform.mentorservice.exception.GuaranteedReviewPriceAlreadyExistsException;
-import com.itmentorcommunityplatform.mentorservice.exception.MentorNotFoundException;
-import com.itmentorcommunityplatform.mentorservice.exception.ProfileNotFoundException;
+import com.itmentorcommunityplatform.mentorservice.exception.*;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
 import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
@@ -48,31 +45,41 @@ public class MentorService {
     private final MentorMapper mentorMapper;
     private final TransactionTemplate transactionTemplate;
 
-    public GuaranteedReviewsPrices insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
+    public GuaranteedReviewsPrices insertGuaranteedReviewPrice(
+            AddPriceForGuaranteedReviewRequest request
+    ) {
         telegramUrlValidator.validate(request.telegramUrl());
-        projectTypeValidator.validate(request.projectType());
 
-        ProfileWithTelegramIdDto responseDto = httpClient.getProfileByTgUrl(request.telegramUrl())
+        ProfileWithTelegramIdDto profile = httpClient
+                .getProfileByTgUrl(request.telegramUrl())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        Mentor mentor = mentorsRepository.getMentorByMentorTelegramUserId(responseDto.telegramUserId())
+        Mentor mentor = mentorsRepository
+                .getMentorByMentorTelegramUserId(profile.telegramUserId())
                 .orElseThrow(MentorNotFoundException::new);
 
-        GuaranteedReviewsPrices price = GuaranteedReviewsPrices.builder()
-                .mentorId(mentor.getId())
-                .projectType(request.projectType())
-                .language(request.language())
-                .priceUsd(request.priceUsd())
-                .build();
+        return saveGuaranteedReviewPrice(
+                mentor,
+                request.language(),
+                request.projectType(),
+                request.priceUsd()
+        );
+    }
 
-        try {
-            return guaranteedReviewsPriceRepository.save(price);
-        } catch (DbActionExecutionException e) {
-            if (e.getCause() instanceof DuplicateKeyException) {
-                throw new GuaranteedReviewPriceAlreadyExistsException();
-            }
-            throw e;
-        }
+    public GuaranteedReviewsPrices addGuaranteedReviewPriceForCurrentMentor(
+            Long telegramUserId,
+            AddGuaranteedReviewPriceRequest request
+    ) {
+        Mentor mentor = mentorsRepository
+                .getMentorByMentorTelegramUserId(telegramUserId)
+                .orElseThrow(UserIsNotMentorException::new);
+
+        return saveGuaranteedReviewPrice(
+                mentor,
+                request.language(),
+                request.projectType(),
+                request.priceUsd()
+        );
     }
 
     public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType) {
@@ -171,5 +178,29 @@ public class MentorService {
     private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {
         return event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank() ?
                 "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
+    }
+    private GuaranteedReviewsPrices saveGuaranteedReviewPrice(
+            Mentor mentor,
+            String language,
+            String projectType,
+            Integer priceUsd
+    ) {
+        projectTypeValidator.validate(projectType);
+
+        GuaranteedReviewsPrices price = GuaranteedReviewsPrices.builder()
+                .mentorId(mentor.getId())
+                .projectType(projectType)
+                .language(language)
+                .priceUsd(priceUsd)
+                .build();
+
+        try {
+            return guaranteedReviewsPriceRepository.save(price);
+        } catch (DbActionExecutionException e) {
+            if (e.getCause() instanceof DuplicateKeyException) {
+                throw new GuaranteedReviewPriceAlreadyExistsException();
+            }
+            throw e;
+        }
     }
 }
