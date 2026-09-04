@@ -98,7 +98,7 @@ public class MentorService {
         });
     }
 
-    @Transactional
+
     public MentorDescriptionResponseDto updateMentorDescription(Long telegramId, MentorDescriptionDto requestDescription) {
         validMentorDescription(requestDescription);
 
