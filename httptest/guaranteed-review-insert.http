@@ -75,7 +75,46 @@ Content-Type: application/json
 }
 ###
 
-### 400 - Missing roles header
+### 400 - Programming language does not exist
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 197342870
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "ABRAKADABRA",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 400 - Mentor does not have programming language
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 423914126
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "Python",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 400 - Price is negative
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 197342870
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": -1
+}
+###
+
+### 500 - Missing roles header
 POST http://localhost:8085/api/mentor/guaranteed-review
 X-Telegram-User-Id: 197342870
 Content-Type: application/json
