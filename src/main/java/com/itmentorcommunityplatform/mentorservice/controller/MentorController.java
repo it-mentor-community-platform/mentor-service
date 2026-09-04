@@ -2,10 +2,7 @@ package com.itmentorcommunityplatform.mentorservice.controller;
 
 import com.itmentorcommunityplatform.mentorservice.docs.PatchUpdateMentorDescription;
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddMentorWithDescription;
-import com.itmentorcommunityplatform.mentorservice.docs.PostAddPricesForGuaranteedReviews;
-import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
-import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import com.itmentorcommunityplatform.mentorservice.exception.InvalidTelegramIdException;
@@ -20,20 +17,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/mentor")
 @RequiredArgsConstructor
-public class InternalMentorController {
+public class MentorController {
 
     private final MentorService mentorService;
-
-    @PostMapping("/internal/guaranteed-review")
-    @PostAddPricesForGuaranteedReviews
-    public ResponseEntity<GuaranteedReviewsPrices> addPriceForGuaranteedReview(
-            @RequestBody AddPriceForGuaranteedReviewRequest request) {
-
-        GuaranteedReviewsPrices savedPrice = mentorService.insertGuaranteedReviewPrice(request);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(savedPrice);
-    }
 
     @PostMapping("/internal/mentor")
     @PostAddMentorWithDescription

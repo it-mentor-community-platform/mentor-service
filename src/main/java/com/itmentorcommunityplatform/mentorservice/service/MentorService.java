@@ -1,20 +1,22 @@
 package com.itmentorcommunityplatform.mentorservice.service;
 
-import com.itmentorcommunityplatform.mentorservice.domain.*;
+import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
+import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
+import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLanguage;
+import com.itmentorcommunityplatform.mentorservice.domain.ProgrammingLanguage;
 import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
-import com.itmentorcommunityplatform.mentorservice.exception.*;
+import com.itmentorcommunityplatform.mentorservice.exception.MentorDescriptionEmptyException;
+import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
+import com.itmentorcommunityplatform.mentorservice.exception.MentorNotFoundException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
-import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ProgrammingLanguagesRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ServicesRepository;
-import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidator;
 import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.stereotype.Service;
@@ -34,41 +36,13 @@ public class MentorService {
     private static final CharSequence UNIQUE_CONSTRAINT_NAME = "idx_mentors_unique";
 
     private final TelegramUrlValidator telegramUrlValidator;
-    private final ProjectTypeValidator projectTypeValidator;
     private final MentorsRepository mentorsRepository;
     private final ProgrammingLanguagesRepository programmingLanguagesRepository;
     private final ServicesRepository servicesRepository;
-    private final GuaranteedReviewsPriceRepository guaranteedReviewsPriceRepository;
     private final ServiceHttpClient httpClient;
     private final MentorMapper mentorMapper;
     private final TransactionTemplate transactionTemplate;
 
-    public GuaranteedReviewsPrices insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
-        telegramUrlValidator.validate(request.telegramUrl());
-        projectTypeValidator.validate(request.projectType());
-
-        ProfileWithTelegramIdDto responseDto = httpClient.getProfileByTgUrl(request.telegramUrl())
-                .orElseThrow(ProfileNotFoundException::new);
-
-        Mentor mentor = mentorsRepository.findByMentorTelegramUserId(responseDto.telegramUserId())
-                .orElseThrow(MentorNotFoundException::new);
-
-        GuaranteedReviewsPrices price = GuaranteedReviewsPrices.builder()
-                .mentorId(mentor.getId())
-                .projectType(request.projectType())
-                .language(request.language())
-                .priceUsd(request.priceUsd())
-                .build();
-
-        try {
-            return guaranteedReviewsPriceRepository.save(price);
-        } catch (DbActionExecutionException e) {
-            if (e.getCause() instanceof DuplicateKeyException) {
-                throw new GuaranteedReviewPriceAlreadyExistsException();
-            }
-            throw e;
-        }
-    }
 
     public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType) {
         return mentorMapper.toMentorDtoList(mentorsRepository.findActiveMentorsByProgrammingLanguageAndProjectType(language, projectType));
@@ -143,6 +117,7 @@ public class MentorService {
         Mentor updated = mentorsRepository.updateMentor(event.getTelegramUserId(), telegramUrl, isActive);
         log.info("Mentor with telegram id: {} has been updated", updated.getMentorTelegramUserId());
     }
+
 
     private Mentor saveMentorOrThrowIfDuplicate(Mentor mentor) {
         try {
