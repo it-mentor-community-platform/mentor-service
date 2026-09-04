@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - staging
+      - dev
   pull_request:
     branches:
       - staging
+      - dev
     types:
       - opened
       - edited
