@@ -114,7 +114,7 @@ Content-Type: application/json
 }
 ###
 
-### 500 - Missing roles header
+### 400 - Missing roles header
 POST http://localhost:8085/api/mentor/guaranteed-review
 X-Telegram-User-Id: 197342870
 Content-Type: application/json
