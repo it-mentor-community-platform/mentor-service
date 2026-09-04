@@ -10,16 +10,12 @@ import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEv
 import com.itmentorcommunityplatform.mentorservice.exception.*;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
-import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ProgrammingLanguagesRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ServicesRepository;
-import com.itmentorcommunityplatform.mentorservice.validator.MentorProgrammingLanguageValidator;
-import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidator;
 import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.stereotype.Service;
@@ -37,17 +33,15 @@ import java.util.stream.Collectors;
 public class MentorService {
 
     private final TelegramUrlValidator telegramUrlValidator;
-    private final ProjectTypeValidator projectTypeValidator;
-    private final MentorProgrammingLanguageValidator mentorProgrammingLanguageValidator;
     private final MentorsRepository mentorsRepository;
     private final ProgrammingLanguagesRepository programmingLanguagesRepository;
     private final ServicesRepository servicesRepository;
-    private final GuaranteedReviewsPriceRepository guaranteedReviewsPriceRepository;
+    private final GuaranteedReviewPriceService guaranteedReviewPriceService;
     private final ServiceHttpClient httpClient;
     private final MentorMapper mentorMapper;
     private final TransactionTemplate transactionTemplate;
 
-    public GuaranteedReviewsPrices insertGuaranteedReviewPrice(
+    public GuaranteedReviewsPrices addGuaranteedReviewPrice(
             AddPriceForGuaranteedReviewRequest request
     ) {
         telegramUrlValidator.validate(request.telegramUrl());
@@ -60,23 +54,7 @@ public class MentorService {
                 .getMentorByMentorTelegramUserId(profile.telegramUserId())
                 .orElseThrow(MentorNotFoundException::new);
 
-        return saveGuaranteedReviewPrice(
-                mentor,
-                request.language(),
-                request.projectType(),
-                request.priceUsd()
-        );
-    }
-
-    public GuaranteedReviewsPrices addGuaranteedReviewPriceForCurrentMentor(
-            Long telegramUserId,
-            AddGuaranteedReviewPriceRequest request
-    ) {
-        Mentor mentor = mentorsRepository
-                .getMentorByMentorTelegramUserId(telegramUserId)
-                .orElseThrow(UserIsNotMentorException::new);
-
-        return saveGuaranteedReviewPrice(
+        return guaranteedReviewPriceService.save(
                 mentor,
                 request.language(),
                 request.projectType(),
@@ -180,30 +158,5 @@ public class MentorService {
     private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {
         return event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank() ?
                 "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
-    }
-    private GuaranteedReviewsPrices saveGuaranteedReviewPrice(
-            Mentor mentor,
-            String language,
-            String projectType,
-            Integer priceUsd
-    ) {
-        projectTypeValidator.validate(projectType);
-        mentorProgrammingLanguageValidator.validate(mentor, language);
-
-        GuaranteedReviewsPrices price = GuaranteedReviewsPrices.builder()
-                .mentorId(mentor.getId())
-                .projectType(projectType)
-                .language(language)
-                .priceUsd(priceUsd)
-                .build();
-
-        try {
-            return guaranteedReviewsPriceRepository.save(price);
-        } catch (DbActionExecutionException e) {
-            if (e.getCause() instanceof DuplicateKeyException) {
-                throw new GuaranteedReviewPriceAlreadyExistsException();
-            }
-            throw e;
-        }
     }
 }

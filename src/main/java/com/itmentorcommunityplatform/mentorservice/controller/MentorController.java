@@ -4,12 +4,12 @@ import com.itmentorcommunityplatform.mentorservice.docs.PostAddGuaranteedReviewP
 import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import com.itmentorcommunityplatform.mentorservice.dto.AddGuaranteedReviewPriceRequest;
 import com.itmentorcommunityplatform.mentorservice.exception.UserIsNotMentorException;
+import com.itmentorcommunityplatform.mentorservice.service.CurrentMentorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.itmentorcommunityplatform.mentorservice.service.MentorService;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class MentorController {
     private static final String MENTOR_ROLE = "MENTOR";
 
 
-    private final MentorService mentorService;
+    private final CurrentMentorService currentMentorService;
 
     @PostMapping("/guaranteed-review")
     @PostAddGuaranteedReviewPrice
@@ -35,7 +35,7 @@ public class MentorController {
         }
 
         GuaranteedReviewsPrices savedPrice =
-                mentorService.addGuaranteedReviewPriceForCurrentMentor(telegramUserId,request);
+                currentMentorService.addGuaranteedReviewPrice(telegramUserId,request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(savedPrice);

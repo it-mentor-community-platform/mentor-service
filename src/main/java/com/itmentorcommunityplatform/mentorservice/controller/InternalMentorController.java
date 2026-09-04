@@ -29,7 +29,7 @@ public class InternalMentorController {
     public ResponseEntity<GuaranteedReviewsPrices> addPriceForGuaranteedReview(
             @RequestBody AddPriceForGuaranteedReviewRequest request) {
 
-        GuaranteedReviewsPrices savedPrice = mentorService.insertGuaranteedReviewPrice(request);
+        GuaranteedReviewsPrices savedPrice = mentorService.addGuaranteedReviewPrice(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(savedPrice);

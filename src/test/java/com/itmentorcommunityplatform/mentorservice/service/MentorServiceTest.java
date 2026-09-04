@@ -1,17 +1,17 @@
 package com.itmentorcommunityplatform.mentorservice.service;
 
+import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
+import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionDto;
 import com.itmentorcommunityplatform.mentorservice.dto.ProfileWithTelegramIdDto;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
-import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ProgrammingLanguagesRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ServicesRepository;
-import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidator;
 import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,9 +26,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class MentorServiceTest {
@@ -46,7 +46,7 @@ class MentorServiceTest {
     @Mock
     private TransactionTemplate transactionTemplate;
     @Mock
-    private GuaranteedReviewsPriceRepository guaranteedReviewsPriceRepository;
+    private GuaranteedReviewPriceService guaranteedReviewPriceService;
 
     private MentorService mentorService;
 
@@ -55,15 +55,13 @@ class MentorServiceTest {
     @BeforeEach
     void setUp() {
         TelegramUrlValidator telegramUrlValidator = new TelegramUrlValidator();
-        ProjectTypeValidator projectTypeValidator = new ProjectTypeValidator();
 
         mentorService = new MentorService(
                 telegramUrlValidator,
-                projectTypeValidator,
                 mentorsRepository,
                 programmingLanguagesRepository,
                 servicesRepository,
-                guaranteedReviewsPriceRepository,
+                guaranteedReviewPriceService,
                 httpClient,
                 mentorMapper,
                 transactionTemplate
@@ -82,6 +80,58 @@ class MentorServiceTest {
             TransactionCallback<?> action = invocation.getArgument(0);
             return action.doInTransaction(mock(TransactionStatus.class));
         });
+    }
+
+    @Test
+    void addGuaranteedReviewPrice_whenMentorExists_shouldSavePrice() {
+        AddPriceForGuaranteedReviewRequest request =
+                new AddPriceForGuaranteedReviewRequest(
+                        "https://t.me/test_mentor",
+                        "Java",
+                        "PET_PROJECT",
+                        10
+                );
+
+        ProfileWithTelegramIdDto profile =
+                new ProfileWithTelegramIdDto(12345L, null);
+
+        Mentor mentor = Mentor.builder()
+                .id(1L)
+                .mentorTelegramUserId(12345L)
+                .build();
+
+        GuaranteedReviewsPrices expected =
+                GuaranteedReviewsPrices.builder()
+                        .mentorId(1L)
+                        .language("Java")
+                        .projectType("PET_PROJECT")
+                        .priceUsd(10)
+                        .build();
+
+        when(httpClient.getProfileByTgUrl(request.telegramUrl()))
+                .thenReturn(Optional.of(profile));
+
+        when(mentorsRepository.getMentorByMentorTelegramUserId(12345L))
+                .thenReturn(Optional.of(mentor));
+
+        when(guaranteedReviewPriceService.save(
+                mentor,
+                request.language(),
+                request.projectType(),
+                request.priceUsd()
+        )).thenReturn(expected);
+
+        GuaranteedReviewsPrices result =
+                mentorService.addGuaranteedReviewPrice(request);
+
+        assertSame(expected, result);
+
+        verify(guaranteedReviewPriceService).save(
+                mentor,
+                "Java",
+                "PET_PROJECT",
+                10
+        );
     }
 
     @Test
