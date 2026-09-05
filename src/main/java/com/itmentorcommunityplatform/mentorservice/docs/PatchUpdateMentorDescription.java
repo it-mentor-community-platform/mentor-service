@@ -45,13 +45,13 @@ import java.lang.annotation.Target;
                                 }
                                 """)
                 )),
-        @ApiResponse(responseCode = "404",
-                description = "Mentor not found",
+        @ApiResponse(responseCode = "403",
+                description = "User is not mentor",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(example = """
                                 {
-                                  "message": "Mentor not found!"
+                                  "message": "Mentor with this telegramId not found!"
                                 }
                                 """)
                 )),
