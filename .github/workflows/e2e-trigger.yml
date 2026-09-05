@@ -19,7 +19,7 @@ jobs:
       - name: Get short SHA
         id: vars
         run: |
-          SHA_SHORT=$(git rev-parse --short HEAD)
+          SHA_SHORT=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
           echo "sha_short=$SHA_SHORT" >> $GITHUB_OUTPUT
 
       - name: Trigger E2E workflow
