@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,6 +21,15 @@ public class GlobalExceptionHandler {
     })
     public ResponseEntity<ApiMessageResponse> illegalArgumentExceptionHandler(RuntimeException e) {
 
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ApiMessageResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ApiMessageResponse> missingRequestHeaderExceptionHandler(
+            MissingRequestHeaderException e
+    ) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ApiMessageResponse(e.getMessage()));
@@ -83,4 +93,13 @@ public class GlobalExceptionHandler {
                 .body(new ApiMessageResponse("Internal server error"));
     }
 
+
+    @ExceptionHandler(MissingMentorRoleException.class)
+    public ResponseEntity<ApiMessageResponse> handleForbiddenException(
+            MissingMentorRoleException e
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ApiMessageResponse(e.getMessage()));
+    }
 }

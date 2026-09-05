@@ -2,10 +2,7 @@ package com.itmentorcommunityplatform.mentorservice.controller;
 
 import com.itmentorcommunityplatform.mentorservice.docs.PatchUpdateMentorDescription;
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddMentorWithDescription;
-import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
-import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionRequestDto;
-import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionResponseDto;
-import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
+import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.exception.InvalidTelegramIdException;
 import com.itmentorcommunityplatform.mentorservice.service.MentorService;
 import jakarta.validation.Valid;

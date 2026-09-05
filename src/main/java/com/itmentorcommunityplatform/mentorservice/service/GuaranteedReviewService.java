@@ -24,37 +24,28 @@ import org.springframework.stereotype.Service;
 public class GuaranteedReviewService {
 
     private final TelegramUrlValidator telegramUrlValidator;
-    private final ProjectTypeValidator projectTypeValidator;
     private final MentorsRepository mentorsRepository;
-    private final GuaranteedReviewsPriceRepository guaranteedReviewsPriceRepository;
     private final ServiceHttpClient httpClient;
+    private final GuaranteedReviewPriceService guaranteedReviewPriceService;
 
-
-    public GuaranteedReviewsPrices insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
+    public GuaranteedReviewsPrices insertGuaranteedReviewPrice(
+            AddPriceForGuaranteedReviewRequest request
+    ) {
         telegramUrlValidator.validate(request.telegramUrl());
-        projectTypeValidator.validate(request.projectType());
 
-        ProfileWithTelegramIdDto responseDto = httpClient.getProfileByTgUrl(request.telegramUrl())
+        ProfileWithTelegramIdDto profile = httpClient
+                .getProfileByTgUrl(request.telegramUrl())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        Mentor mentor = mentorsRepository.findByMentorTelegramUserId(responseDto.telegramUserId())
+        Mentor mentor = mentorsRepository
+                .findByMentorTelegramUserId(profile.telegramUserId())
                 .orElseThrow(MentorNotFoundException::new);
 
-        GuaranteedReviewsPrices price = GuaranteedReviewsPrices.builder()
-                .mentorId(mentor.getId())
-                .projectType(request.projectType())
-                .language(request.language())
-                .priceUsd(request.priceUsd())
-                .build();
-
-        try {
-            return guaranteedReviewsPriceRepository.save(price);
-        } catch (DbActionExecutionException e) {
-            if (e.getCause() instanceof DuplicateKeyException) {
-                throw new GuaranteedReviewPriceAlreadyExistsException();
-            }
-            throw e;
-        }
+        return guaranteedReviewPriceService.save(
+                mentor,
+                request.language(),
+                request.projectType(),
+                request.priceUsd()
+        );
     }
-
 }

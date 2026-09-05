@@ -6,9 +6,7 @@ import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLangu
 import com.itmentorcommunityplatform.mentorservice.domain.ProgrammingLanguage;
 import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
-import com.itmentorcommunityplatform.mentorservice.exception.MentorDescriptionEmptyException;
-import com.itmentorcommunityplatform.mentorservice.exception.MentorDoesNotExistException;
-import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
+import com.itmentorcommunityplatform.mentorservice.exception.*;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
@@ -42,7 +40,6 @@ public class MentorService {
     private final ServiceHttpClient httpClient;
     private final MentorMapper mentorMapper;
     private final TransactionTemplate transactionTemplate;
-
 
     public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType) {
         return mentorMapper.toMentorDtoList(mentorsRepository.findActiveMentorsByProgrammingLanguageAndProjectType(language, projectType));

@@ -2,10 +2,7 @@ package com.itmentorcommunityplatform.mentorservice.service;
 
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
-import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
-import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionDto;
-import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionRequestDto;
-import com.itmentorcommunityplatform.mentorservice.dto.ProfileWithTelegramIdDto;
+import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDoesNotExistException;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
@@ -35,6 +32,7 @@ import static org.mockito.Mockito.*;
 class MentorServiceTest {
 
     public static final long TELEGRAM_MENTOR_ID = 12345L;
+
     @Mock
     private MentorsRepository mentorsRepository;
     @Mock
@@ -68,7 +66,13 @@ class MentorServiceTest {
                 transactionTemplate
         );
 
-        MentorDescriptionDto descriptionDto = new MentorDescriptionDto("Peter Parker", "100", "Description");
+        MentorDescriptionDto descriptionDto =
+                new MentorDescriptionDto(
+                        "Peter Parker",
+                        "100",
+                        "Description"
+                );
+
         mentorRequest = new AddMentorWithDescriptionRequest(
                 TELEGRAM_MENTOR_ID,
                 "https://t.me/test_mentor",
@@ -77,11 +81,11 @@ class MentorServiceTest {
                 List.of("Code Review")
         );
 
-
-        lenient().when(transactionTemplate.execute(any())).thenAnswer(invocation -> {
-            TransactionCallback<?> action = invocation.getArgument(0);
-            return action.doInTransaction(mock(TransactionStatus.class));
-        });
+        lenient().when(transactionTemplate.execute(any()))
+                .thenAnswer(invocation -> {
+                    TransactionCallback<?> action = invocation.getArgument(0);
+                    return action.doInTransaction(mock(TransactionStatus.class));
+                });
     }
 
     @Test
