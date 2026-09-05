@@ -20,7 +20,7 @@ public class UserAuthenticatedConsumer {
         try {
             mentorService.updateMentorProfile(event);
             log.info("Kafka Consumer: Successfully processed event for user {}", event.getTelegramUserId());
-         } catch (Exception e) {
+        } catch (Exception e) {
             log.error("Kafka Consumer: Error processing event for user {}", event.getTelegramUserId(), e);
             throw e;
         }

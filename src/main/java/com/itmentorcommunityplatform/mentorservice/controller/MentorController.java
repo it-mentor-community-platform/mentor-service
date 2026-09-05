@@ -1,12 +1,8 @@
 package com.itmentorcommunityplatform.mentorservice.controller;
 
-import com.itmentorcommunityplatform.mentorservice.docs.PostAddGuaranteedReviewPrice;
-import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
-import com.itmentorcommunityplatform.mentorservice.dto.AddGuaranteedReviewPriceRequest;
-import com.itmentorcommunityplatform.mentorservice.exception.MissingMentorRoleException;
-import com.itmentorcommunityplatform.mentorservice.service.CurrentMentorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +15,33 @@ import java.util.List;
 public class MentorController {
 
     private static final String MENTOR_ROLE = "MENTOR";
+    private final MentorService mentorService;
 
+    @PostMapping("/internal/mentor")
+    @PostAddMentorWithDescription
+    public ResponseEntity<MentorResponseDto> createMentorWithDescription(
+            @RequestBody @Valid AddMentorWithDescriptionRequest request) {
 
-    private final CurrentMentorService currentMentorService;
+        MentorResponseDto response = mentorService.createMentorWithDescription(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PatchMapping("/mentor/description")
+    @PatchUpdateMentorDescription
+    public ResponseEntity<MentorDescriptionResponseDto> patchMentorWithDescription(
+            @Valid @RequestBody MentorDescriptionRequestDto request,
+            @RequestHeader("X-Telegram-User-Id") String telegramId
+    ) {
+        Long parsedTelegramId = parseTelegramIdFromString(telegramId);
+
+        MentorDescriptionResponseDto response = mentorService.updateMentorDescription(
+                parsedTelegramId, request);
+
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/guaranteed-review")
     @PostAddGuaranteedReviewPrice
@@ -39,5 +59,13 @@ public class MentorController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(savedPrice);
+    }
+
+    private @NonNull Long parseTelegramIdFromString(String telegramId) {
+        try {
+            return Long.valueOf(telegramId);
+        } catch (NumberFormatException e) {
+            throw new InvalidTelegramIdException("X-Telegram-User-Id must be valid numeric!");
+        }
     }
 }
