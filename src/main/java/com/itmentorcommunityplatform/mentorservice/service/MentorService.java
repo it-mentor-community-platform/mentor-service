@@ -43,26 +43,6 @@ public class MentorService {
     private final MentorMapper mentorMapper;
     private final TransactionTemplate transactionTemplate;
 
-    private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {
-        return event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank() ?
-                "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
-    }
-
-    private static void validMentorDescription(MentorDescriptionDto mentorDescriptionDtoNew) {
-        if (isValueNullOrBlank(mentorDescriptionDtoNew.name()) &&
-                isValueNullOrBlank(mentorDescriptionDtoNew.cost()) &&
-                isValueNullOrBlank(mentorDescriptionDtoNew.description())) {
-            throw new MentorDescriptionEmptyException("Mentor description is empty!");
-        }
-    }
-
-    private static String coalesce(String newValue, String oldValue) {
-        return isValueNullOrBlank(newValue) ? oldValue : newValue;
-    }
-
-    private static boolean isValueNullOrBlank(String value) {
-        return value == null || value.isBlank();
-    }
 
     public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType) {
         return mentorMapper.toMentorDtoList(mentorsRepository.findActiveMentorsByProgrammingLanguageAndProjectType(language, projectType));
@@ -132,6 +112,23 @@ public class MentorService {
         log.info("Mentor with telegram id: {} has been updated", updated.getMentorTelegramUserId());
     }
 
+    private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {
+        return event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank() ?
+                "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
+    }
+
+    private static void validMentorDescription(MentorDescriptionDto mentorDescriptionDtoNew) {
+        if (isValueNullOrBlank(mentorDescriptionDtoNew.name()) &&
+                isValueNullOrBlank(mentorDescriptionDtoNew.cost()) &&
+                isValueNullOrBlank(mentorDescriptionDtoNew.description())) {
+            throw new MentorDescriptionEmptyException("Mentor description is empty!");
+        }
+    }
+
+    private static boolean isValueNullOrBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
     private Mentor saveMentorOrThrowIfDuplicate(Mentor mentor) {
         try {
             return mentorsRepository.save(mentor);
@@ -167,18 +164,6 @@ public class MentorService {
         description.setName(mentorDescriptionDto.name());
         description.setCost(mentorDescriptionDto.cost());
         description.setDescription(mentorDescriptionDto.description());
-        return description;
-    }
-
-    private MentorDescription updateDescription(MentorDescriptionDto mentorDescriptionDtoNew, MentorDescriptionDto mentorDescriptionDtoOld) {
-        MentorDescription description = new MentorDescription();
-
-        description.setName(coalesce(
-                mentorDescriptionDtoNew.name(), mentorDescriptionDtoOld.name()));
-        description.setCost(coalesce(
-                mentorDescriptionDtoNew.cost(), mentorDescriptionDtoOld.cost()));
-        description.setDescription(coalesce(
-                mentorDescriptionDtoNew.description(), mentorDescriptionDtoOld.description()));
         return description;
     }
 
