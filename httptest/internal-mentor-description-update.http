@@ -5,7 +5,7 @@ POST http://localhost:8085/api/mentor/internal/mentor
 Content-Type: application/json
 
 {
-  "mentorTelegramUserId": 12345678917,
+  "mentorTelegramUserId": 12345678918,
   "telegramUrl": "https://t.me/zhukovsd_1_test",
   "description": {
     "name": "Sergey Zhukov",

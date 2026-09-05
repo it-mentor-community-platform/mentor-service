@@ -79,7 +79,7 @@ public class MentorService {
     }
 
 
-    public MentorDescriptionResponseDto updateMentorDescription(Long telegramId, MentorDescriptionDto requestDescription) {
+    public MentorDescriptionResponseDto updateMentorDescription(Long telegramId, MentorDescriptionRequestDto requestDescription) {
         validMentorDescription(requestDescription);
 
         MentorDescription updatedMentorDescription = mentorsRepository.updateMentorDescription(telegramId,
@@ -117,7 +117,7 @@ public class MentorService {
                 "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
     }
 
-    private static void validMentorDescription(MentorDescriptionDto mentorDescriptionDtoNew) {
+    private static void validMentorDescription(MentorDescriptionRequestDto mentorDescriptionDtoNew) {
         if (isValueNullOrBlank(mentorDescriptionDtoNew.name()) &&
                 isValueNullOrBlank(mentorDescriptionDtoNew.cost()) &&
                 isValueNullOrBlank(mentorDescriptionDtoNew.description())) {

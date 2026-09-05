@@ -3,7 +3,7 @@ package com.itmentorcommunityplatform.mentorservice.controller;
 import com.itmentorcommunityplatform.mentorservice.docs.PatchUpdateMentorDescription;
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddMentorWithDescription;
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
-import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionDto;
+import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionRequestDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionResponseDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import com.itmentorcommunityplatform.mentorservice.exception.InvalidTelegramIdException;
@@ -37,7 +37,7 @@ public class MentorController {
     @PatchMapping("/mentor/description")
     @PatchUpdateMentorDescription
     public ResponseEntity<MentorDescriptionResponseDto> patchMentorWithDescription(
-            @RequestBody MentorDescriptionDto request,
+            @Valid @RequestBody MentorDescriptionRequestDto request,
             @RequestHeader("X-Telegram-User-Id") String telegramId
     ) {
         Long parsedTelegramId = parseTelegramIdFromString(telegramId);

@@ -4,6 +4,7 @@ import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionDto;
+import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionRequestDto;
 import com.itmentorcommunityplatform.mentorservice.dto.ProfileWithTelegramIdDto;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDoesNotExistException;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
@@ -51,7 +52,7 @@ class MentorServiceTest {
 
     private AddMentorWithDescriptionRequest mentorRequest;
 
-    private MentorDescriptionDto descriptionRequest;
+    private MentorDescriptionRequestDto descriptionRequest;
 
     @BeforeEach
     void setUp() {
@@ -164,7 +165,7 @@ class MentorServiceTest {
         when(mentorsRepository.updateMentorDescription(TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription)).thenReturn(Optional.of(
                 new MentorDescription(1L, TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription)
         ));
-        descriptionRequest = new MentorDescriptionDto(mentorNewName, mentorNewCost, mentorNewDescription);
+        descriptionRequest = new MentorDescriptionRequestDto(mentorNewName, mentorNewCost, mentorNewDescription);
 
         mentorService.updateMentorDescription(TELEGRAM_MENTOR_ID, descriptionRequest);
 
@@ -181,7 +182,7 @@ class MentorServiceTest {
         when(mentorsRepository.updateMentorDescription(TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription)).thenReturn(Optional.of(
                 new MentorDescription(1L, TELEGRAM_MENTOR_ID, mentorNewName, "900", "mentorOldDescription")
         ));
-        descriptionRequest = new MentorDescriptionDto(mentorNewName, mentorNewCost, mentorNewDescription);
+        descriptionRequest = new MentorDescriptionRequestDto(mentorNewName, mentorNewCost, mentorNewDescription);
 
         mentorService.updateMentorDescription(TELEGRAM_MENTOR_ID, descriptionRequest);
 
@@ -196,7 +197,7 @@ class MentorServiceTest {
         String mentorNewDescription = "not null";
 
         when(mentorsRepository.updateMentorDescription(TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription)).thenReturn(Optional.empty());
-        descriptionRequest = new MentorDescriptionDto(mentorNewName, mentorNewCost, mentorNewDescription);
+        descriptionRequest = new MentorDescriptionRequestDto(mentorNewName, mentorNewCost, mentorNewDescription);
 
         assertThrows(MentorDoesNotExistException.class,
                 () -> mentorService.updateMentorDescription(TELEGRAM_MENTOR_ID, descriptionRequest));
