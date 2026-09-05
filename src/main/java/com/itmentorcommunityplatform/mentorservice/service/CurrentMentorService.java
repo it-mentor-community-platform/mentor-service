@@ -19,7 +19,7 @@ public class CurrentMentorService {
             AddGuaranteedReviewPriceRequest request
     ) {
         Mentor mentor = mentorsRepository
-                .getMentorByMentorTelegramUserId(telegramUserId)
+                .findByMentorTelegramUserId(telegramUserId)
                 .orElseThrow(MissingMentorRoleException::new);
 
         return guaranteedReviewPriceService.save(
