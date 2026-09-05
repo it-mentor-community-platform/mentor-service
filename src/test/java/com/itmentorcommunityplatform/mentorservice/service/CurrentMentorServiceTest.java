@@ -60,7 +60,7 @@ class CurrentMentorServiceTest {
                         .priceUsd(10)
                         .build();
 
-        when(mentorsRepository.getMentorByMentorTelegramUserId(telegramUserId))
+        when(mentorsRepository.findByMentorTelegramUserId(telegramUserId))
                 .thenReturn(Optional.of(mentor));
 
         when(guaranteedReviewPriceService.save(
@@ -79,7 +79,7 @@ class CurrentMentorServiceTest {
         assertSame(expectedPrice, result);
 
         verify(mentorsRepository)
-                .getMentorByMentorTelegramUserId(telegramUserId);
+                .findByMentorTelegramUserId(telegramUserId);
 
         verify(guaranteedReviewPriceService).save(
                 mentor,
@@ -100,7 +100,7 @@ class CurrentMentorServiceTest {
                         10
                 );
 
-        when(mentorsRepository.getMentorByMentorTelegramUserId(telegramUserId))
+        when(mentorsRepository.findByMentorTelegramUserId(telegramUserId))
                 .thenReturn(Optional.empty());
 
         assertThrows(
