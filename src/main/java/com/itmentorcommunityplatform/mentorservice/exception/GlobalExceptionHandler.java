@@ -4,6 +4,7 @@ import com.itmentorcommunityplatform.mentorservice.dto.ApiMessageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,14 +28,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiMessageResponse> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
 
+        FieldError fieldError = e.getBindingResult().getFieldError();
+
+        String message = fieldError == null ? "Method argument not valid" : fieldError.getDefaultMessage();
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ApiMessageResponse(e.getBindingResult().getFieldError().getDefaultMessage()));
+                .body(new ApiMessageResponse(message));
     }
 
 
     @ExceptionHandler(MentorDoesNotExistException.class)
-    public ResponseEntity<ApiMessageResponse> methodArgumentNotValidExceptionHandler(MentorNotFoundException e) {
+    public ResponseEntity<ApiMessageResponse> methodArgumentNotValidExceptionHandler(MentorDoesNotExistException e) {
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)

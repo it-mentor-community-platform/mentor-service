@@ -5,7 +5,4 @@ public class MentorNotFoundException extends RuntimeException {
         super("Mentor not found");
     }
 
-    public MentorNotFoundException(String message) {
-        super(message);
-    }
 }
