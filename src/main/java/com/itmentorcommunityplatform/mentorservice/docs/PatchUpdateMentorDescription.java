@@ -1,6 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.docs;
 
-import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
+import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,19 +18,19 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
         summary = "Post request for create Mentor with description",
-        description = "Request to insert into tables Mentor, Mentor/Descriptions, Mentor/Programming languages, and Mentor/Services",
+        description = "Request to update table Mentor/Descriptions",
         requestBody = @RequestBody(
                 required = true,
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = AddMentorWithDescriptionRequest.class)
+                        schema = @Schema(implementation = MentorDescriptionDto.class)
                 )
         )
 )
 
 @ApiResponses({
-        @ApiResponse(responseCode = "201",
-                description = "Mentor created successfully",
+        @ApiResponse(responseCode = "200",
+                description = "Mentor description updated successfully",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = MentorResponseDto.class)
@@ -45,13 +45,13 @@ import java.lang.annotation.Target;
                                 }
                                 """)
                 )),
-        @ApiResponse(responseCode = "409",
-                description = "Mentor already exists",
+        @ApiResponse(responseCode = "403",
+                description = "User is not mentor",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(example = """
                                 {
-                                  "message": "Mentor with given telegram user id already exists"
+                                  "message": "Mentor with this telegramId not found!"
                                 }
                                 """)
                 )),
@@ -67,5 +67,6 @@ import java.lang.annotation.Target;
                 ))
 })
 
-public @interface PostAddMentorWithDescription {
+public @interface PatchUpdateMentorDescription {
 }
+

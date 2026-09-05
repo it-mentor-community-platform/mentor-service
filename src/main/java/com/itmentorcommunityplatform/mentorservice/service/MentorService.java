@@ -1,27 +1,22 @@
 package com.itmentorcommunityplatform.mentorservice.service;
 
-import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorProgrammingLanguage;
 import com.itmentorcommunityplatform.mentorservice.domain.ProgrammingLanguage;
 import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
+import com.itmentorcommunityplatform.mentorservice.exception.MentorDescriptionEmptyException;
+import com.itmentorcommunityplatform.mentorservice.exception.MentorDoesNotExistException;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
-import com.itmentorcommunityplatform.mentorservice.exception.GuaranteedReviewPriceAlreadyExistsException;
-import com.itmentorcommunityplatform.mentorservice.exception.MentorNotFoundException;
-import com.itmentorcommunityplatform.mentorservice.exception.ProfileNotFoundException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
-import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ProgrammingLanguagesRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.ServicesRepository;
-import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidator;
 import com.itmentorcommunityplatform.mentorservice.validator.TelegramUrlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.stereotype.Service;
@@ -38,42 +33,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MentorService {
 
+    private static final CharSequence UNIQUE_CONSTRAINT_NAME = "idx_mentors_unique";
+
     private final TelegramUrlValidator telegramUrlValidator;
-    private final ProjectTypeValidator projectTypeValidator;
     private final MentorsRepository mentorsRepository;
     private final ProgrammingLanguagesRepository programmingLanguagesRepository;
     private final ServicesRepository servicesRepository;
-    private final GuaranteedReviewsPriceRepository guaranteedReviewsPriceRepository;
     private final ServiceHttpClient httpClient;
     private final MentorMapper mentorMapper;
     private final TransactionTemplate transactionTemplate;
 
-    public GuaranteedReviewsPrices insertGuaranteedReviewPrice(AddPriceForGuaranteedReviewRequest request) {
-        telegramUrlValidator.validate(request.telegramUrl());
-        projectTypeValidator.validate(request.projectType());
-
-        ProfileWithTelegramIdDto responseDto = httpClient.getProfileByTgUrl(request.telegramUrl())
-                .orElseThrow(ProfileNotFoundException::new);
-
-        Mentor mentor = mentorsRepository.getMentorByMentorTelegramUserId(responseDto.telegramUserId())
-                .orElseThrow(MentorNotFoundException::new);
-
-        GuaranteedReviewsPrices price = GuaranteedReviewsPrices.builder()
-                .mentorId(mentor.getId())
-                .projectType(request.projectType())
-                .language(request.language())
-                .priceUsd(request.priceUsd())
-                .build();
-
-        try {
-            return guaranteedReviewsPriceRepository.save(price);
-        } catch (DbActionExecutionException e) {
-            if (e.getCause() instanceof DuplicateKeyException) {
-                throw new GuaranteedReviewPriceAlreadyExistsException();
-            }
-            throw e;
-        }
-    }
 
     public List<MentorDto> searchActiveMentorsByLanguageAndProjectType(String language, String projectType) {
         return mentorMapper.toMentorDtoList(mentorsRepository.findActiveMentorsByProgrammingLanguageAndProjectType(language, projectType));
@@ -98,34 +67,35 @@ public class MentorService {
                     .mentorTelegramUserId(request.mentorTelegramUserId())
                     .telegramUrl(request.telegramUrl())
                     .isActive(false)
-                    .mentorDescription(buildDescription(request))
+                    .mentorDescription(buildDescription(request.description()))
                     .programmingLanguages(buildLanguages(request.programmingLanguages()))
                     .services(buildServices(request.services()))
                     .build();
 
-            try {
-                Mentor savedMentor = mentorsRepository.save(mentor);
-                log.info("Mentor with telegram url: {} created successfully", request.telegramUrl());
-                return mentorMapper.toMentorResponseDto(savedMentor, true);
-            } catch (DbActionExecutionException e) {
-                Throwable cause = e;
-                while (cause.getCause() != null) {
-                    cause = cause.getCause();
-                }
-                String rootMessage = cause.getMessage();
-
-                if (rootMessage != null && rootMessage.contains("idx_mentors_unique")) {
-                    throw new MentorDuplicateException("Mentor with given telegramUserId or url already exists");
-                }
-                throw e;
-            }
+            Mentor savedMentor = saveMentorOrThrowIfDuplicate(mentor);
+            log.info("Mentor with telegram url: {} created successfully", request.telegramUrl());
+            return mentorMapper.toMentorResponseDto(savedMentor);
         });
+    }
+
+
+    public MentorDescriptionResponseDto updateMentorDescription(Long telegramId, MentorDescriptionRequestDto requestDescription) {
+        validMentorDescription(requestDescription);
+
+        MentorDescription updatedMentorDescription = mentorsRepository.updateMentorDescription(telegramId,
+                requestDescription.name(),
+                requestDescription.cost(),
+                requestDescription.description()
+        ).orElseThrow(() -> new MentorDoesNotExistException("Mentor with this telegramId not found!"));
+
+        log.info("Mentor with name: {} updated successfully", updatedMentorDescription.getName());
+        return mentorMapper.mapDescriptionToDto(updatedMentorDescription);
     }
 
     @Transactional
     public void updateMentorProfile(UserAuthenticatedEvent event) {
         boolean isActive = event.getRoles().contains("MENTOR");
-        Optional<Mentor> possibleMentor = mentorsRepository.getMentorByMentorTelegramUserId(event.getTelegramUserId());
+        Optional<Mentor> possibleMentor = mentorsRepository.findByMentorTelegramUserId(event.getTelegramUserId());
         if (possibleMentor.isEmpty()) {
             log.info("Mentor with telegram id: {} not found", event.getTelegramUserId());
             return;
@@ -140,6 +110,35 @@ public class MentorService {
 
         Mentor updated = mentorsRepository.updateMentor(event.getTelegramUserId(), telegramUrl, isActive);
         log.info("Mentor with telegram id: {} has been updated", updated.getMentorTelegramUserId());
+    }
+
+    private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {
+        return event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank() ?
+                "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
+    }
+
+    private static void validMentorDescription(MentorDescriptionRequestDto mentorDescriptionDtoNew) {
+        if (isValueNullOrBlank(mentorDescriptionDtoNew.name()) &&
+                isValueNullOrBlank(mentorDescriptionDtoNew.cost()) &&
+                isValueNullOrBlank(mentorDescriptionDtoNew.description())) {
+            throw new MentorDescriptionEmptyException("Mentor description is empty!");
+        }
+    }
+
+    private static boolean isValueNullOrBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private Mentor saveMentorOrThrowIfDuplicate(Mentor mentor) {
+        try {
+            return mentorsRepository.save(mentor);
+        } catch (DbActionExecutionException e) {
+            String rootMessage = getRootMessageFromDbException(e);
+            if (rootMessage != null && rootMessage.contains(UNIQUE_CONSTRAINT_NAME)) {
+                throw new MentorDuplicateException("Mentor with given telegramUserId or url already exists");
+            }
+            throw e;
+        }
     }
 
     private Set<MentorProgrammingLanguage> buildLanguages(List<String> languages) {
@@ -160,16 +159,19 @@ public class MentorService {
                 .collect(Collectors.toSet());
     }
 
-    private MentorDescription buildDescription(AddMentorWithDescriptionRequest request) {
+    private MentorDescription buildDescription(MentorDescriptionDto mentorDescriptionDto) {
         MentorDescription description = new MentorDescription();
-        description.setName(request.description().name());
-        description.setCost(request.description().cost());
-        description.setDescription(request.description().description());
+        description.setName(mentorDescriptionDto.name());
+        description.setCost(mentorDescriptionDto.cost());
+        description.setDescription(mentorDescriptionDto.description());
         return description;
     }
 
-    private static String resolveTelegramUrl(UserAuthenticatedEvent event, Mentor mentor) {
-        return event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank() ?
-                "https://t.me/" + event.getTelegramUsername() : mentor.getTelegramUrl();
+    private String getRootMessageFromDbException(DbActionExecutionException e) {
+        Throwable cause = e;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause.getMessage();
     }
 }
