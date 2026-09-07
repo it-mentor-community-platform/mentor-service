@@ -22,13 +22,19 @@ jobs:
           SHA_SHORT=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
           echo "sha_short=$SHA_SHORT" >> $GITHUB_OUTPUT
 
-      - name: Trigger E2E workflow
-        uses: peter-evans/repository-dispatch@v4
+      - name: Trigger E2E workflow and wait for result
+        uses: convictional/trigger-workflow-and-wait@v1.6.5
         with:
-          token: '${{ secrets.E2E_TRIGGER_TOKEN }}'
-          repository: it-mentor-community-platform/e2e-tests
-          event-type: run-e2e-tests
-          client-payload: |
+          owner: it-mentor-community-platform
+          repo: e2e-tests
+          github_token: '${{ secrets.E2E_TRIGGER_TOKEN }}'
+          workflow_file_name: ci.yml
+          ref: dev
+          client_payload: |
             {
               "mentor_service_tag": "sha-${{ steps.vars.outputs.sha_short }}"
             }
+          propagate_failure: true
+          trigger_workflow: true
+          wait_workflow: true
+          wait_interval: 15
