@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MentorService {
 
-    private static final CharSequence UNIQUE_CONSTRAINT_NAME = "idx_mentors_unique";
+    private static final CharSequence TELEGRAM_USER_ID_UNIQUE_INDEX = "idx_mentors_unique";
+    private static final String TELEGRAM_URL_UNIQUE_INDEX = "idx_mentors_telegram_url_unique";
 
     private final TelegramUrlValidator telegramUrlValidator;
     private final MentorsRepository mentorsRepository;
@@ -131,7 +132,8 @@ public class MentorService {
             return mentorsRepository.save(mentor);
         } catch (DbActionExecutionException e) {
             String rootMessage = getRootMessageFromDbException(e);
-            if (rootMessage != null && rootMessage.contains(UNIQUE_CONSTRAINT_NAME)) {
+            if (rootMessage != null && (rootMessage.contains(TELEGRAM_USER_ID_UNIQUE_INDEX)
+                    || rootMessage.contains(TELEGRAM_URL_UNIQUE_INDEX))) {
                 throw new MentorDuplicateException("Mentor with given telegramUserId or url already exists");
             }
             throw e;
