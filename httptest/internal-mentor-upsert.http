@@ -102,7 +102,7 @@ Content-Type: application/json
   "programmingLanguages": ["Java", "Python", "Kotlin"]
 }
 
-### 8. 409-Conflict (Mentor already exists)
+### 8. 409 - Conflict (Mentor already exists)
 POST http://localhost:8085/api/mentor/internal/mentor
 Content-Type: application/json
 
@@ -116,4 +116,20 @@ Content-Type: application/json
   },
   "programmingLanguages": ["Java", "Python", "Kotlin"],
   "services": ["менторство по поиску работы", "консультации"]
+}
+
+### 9. 409 - Mentor with telegram url already exists
+POST http://localhost:8085/api/mentor/internal/mentor
+Content-Type: application/json
+
+{
+  "mentorTelegramUserId": 987654,
+  "telegramUrl": "https://t.me/zhukovsd",
+  "description": {
+    "name": "Another Mentor",
+    "cost": "PAID",
+    "description": "Description"
+  },
+  "programmingLanguages": ["Java"],
+  "services": ["консультации"]
 }

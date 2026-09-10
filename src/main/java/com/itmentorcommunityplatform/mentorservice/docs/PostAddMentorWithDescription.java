@@ -51,7 +51,7 @@ import java.lang.annotation.Target;
                         mediaType = "application/json",
                         schema = @Schema(example = """
                                 {
-                                  "message": "Mentor with given telegram user id already exists"
+                                  "message": "Mentor with given telegram user id or url already exists"
                                 }
                                 """)
                 )),
