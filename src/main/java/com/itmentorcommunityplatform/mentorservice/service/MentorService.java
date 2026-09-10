@@ -132,9 +132,11 @@ public class MentorService {
             return mentorsRepository.save(mentor);
         } catch (DbActionExecutionException e) {
             String rootMessage = getRootMessageFromDbException(e);
-            if (rootMessage != null && (rootMessage.contains(TELEGRAM_USER_ID_UNIQUE_INDEX)
-                    || rootMessage.contains(TELEGRAM_URL_UNIQUE_INDEX))) {
-                throw new MentorDuplicateException("Mentor with given telegramUserId or url already exists");
+            if (rootMessage != null && rootMessage.contains(TELEGRAM_USER_ID_UNIQUE_INDEX)) {
+                throw new MentorDuplicateException("Mentor with given telegramUserId already exists");
+            }
+            if (rootMessage != null && rootMessage.contains(TELEGRAM_URL_UNIQUE_INDEX)) {
+                throw new MentorDuplicateException("Mentor with given telegram url already exists");
             }
             throw e;
         }
