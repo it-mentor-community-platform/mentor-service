@@ -72,7 +72,7 @@ public class MentorService {
 
             Mentor savedMentor = saveMentorOrThrowIfDuplicate(mentor);
             log.info("Mentor with telegram url: {} created successfully", request.telegramUrl());
-            return mentorMapper.toMentorResponseDto(savedMentor);
+            return mentorMapper.toMentorResponseDto(savedMentor, request);
         });
     }
 
