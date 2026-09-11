@@ -7,3 +7,6 @@ databaseChangeLog:
       file: db/changelog/changesets/003-create-tables.sql
   - include:
       file: db/changelog/changesets/004-add-unique-constraint.sql
+  - include:
+      file: db/changelog/changesets/005-create-telegram-url-unique-index.sql
+        

@@ -1,14 +1,12 @@
 package com.itmentorcommunityplatform.mentorservice.controller;
 
 import com.itmentorcommunityplatform.mentorservice.docs.PatchUpdateMentorDescription;
-import com.itmentorcommunityplatform.mentorservice.docs.PostAddMentorWithDescription;
 import com.itmentorcommunityplatform.mentorservice.dto.*;
 import com.itmentorcommunityplatform.mentorservice.exception.InvalidTelegramIdException;
-import com.itmentorcommunityplatform.mentorservice.service.MentorService;
+import com.itmentorcommunityplatform.mentorservice.service.CurrentMentorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,19 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MentorController {
 
-    private final MentorService mentorService;
-
-    @PostMapping("/internal/mentor")
-    @PostAddMentorWithDescription
-    public ResponseEntity<MentorResponseDto> createMentorWithDescription(
-            @RequestBody @Valid AddMentorWithDescriptionRequest request) {
-
-        MentorResponseDto response = mentorService.createMentorWithDescription(request);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
+    private final CurrentMentorService currentMentorService;
 
     @PatchMapping("/mentor/description")
     @PatchUpdateMentorDescription
@@ -39,7 +25,7 @@ public class MentorController {
     ) {
         Long parsedTelegramId = parseTelegramIdFromString(telegramId);
 
-        MentorDescriptionResponseDto response = mentorService.updateMentorDescription(
+        MentorDescriptionResponseDto response = currentMentorService.updateMentorDescription(
                 parsedTelegramId, request);
 
         return ResponseEntity.ok(response);

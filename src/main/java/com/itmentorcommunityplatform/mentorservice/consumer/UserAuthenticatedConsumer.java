@@ -1,7 +1,7 @@
 package com.itmentorcommunityplatform.mentorservice.consumer;
 
 import com.itmentorcommunityplatform.mentorservice.dto.event.UserAuthenticatedEvent;
-import com.itmentorcommunityplatform.mentorservice.service.MentorService;
+import com.itmentorcommunityplatform.mentorservice.service.MentorSynchronizationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserAuthenticatedConsumer {
 
-    private final MentorService mentorService;
+    private final MentorSynchronizationService mentorSynchronizationService;
 
     @KafkaListener(topics = "${spring.kafka.topic.auth-user-authenticated}", groupId = "mentor-service-cg")
     public void consumeUserAuthenticatedEvent(UserAuthenticatedEvent event) {
         log.info("Kafka Consumer: Received user authenticated event: {}", event);
         try {
-            mentorService.updateMentorProfile(event);
+            mentorSynchronizationService.updateMentorProfile(event);
             log.info("Kafka Consumer: Successfully processed event for user {}", event.getTelegramUserId());
         } catch (Exception e) {
             log.error("Kafka Consumer: Error processing event for user {}", event.getTelegramUserId(), e);

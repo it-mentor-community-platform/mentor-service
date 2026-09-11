@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.mentorservice.mapper;
 
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
+import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDescriptionResponseDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDto;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
@@ -22,13 +23,14 @@ public class MentorMapper {
         return result;
     }
 
-    public MentorResponseDto toMentorResponseDto(Mentor mentor) {
+    public MentorResponseDto toMentorResponseDto(Mentor mentor, AddMentorWithDescriptionRequest request) {
         return new MentorResponseDto(
                 mentor.getId(),
                 mentor.getMentorTelegramUserId(),
                 mentor.getTelegramUrl(),
                 mapDescriptionToDto(mentor.getMentorDescription()),
-                mentor.isActive()
+                request.programmingLanguages(),
+                request.services()
         );
     }
 
