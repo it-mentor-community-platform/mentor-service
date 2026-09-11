@@ -1,13 +1,6 @@
 name: Trigger E2E Tests
 
 on:
-  workflow_run:
-    workflows: [ "CI - Build & Push Docker Image" ]
-    types:
-      - completed
-    branches:
-      - staging
-      - dev
   pull_request:
     branches:
       - staging
@@ -16,26 +9,17 @@ on:
 
 jobs:
   trigger-e2e:
-
-
-  
     name: Trigger E2E Test in e2e repo
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Get short SHA
         id: vars
         run: |
-          if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            FULL_SHA="${{ github.event.workflow_run.head_sha }}"
-          else
-            FULL_SHA="${{ github.event.pull_request.head.sha }}"
-          fi
+          FULL_SHA="${{ github.event.pull_request.head.sha }}"
           echo "full_sha=$FULL_SHA" >> $GITHUB_OUTPUT
           echo "sha_short=$(echo $FULL_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
 
       - name: Wait for build workflow to complete
-        if: ${{ github.event_name == 'pull_request' }}
         uses: lewagon/wait-on-check-action@v1.3.4
         with:
           ref: ${{ steps.vars.outputs.full_sha }}
