@@ -1,9 +1,7 @@
 package com.itmentorcommunityplatform.mentorservice.service;
 
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
-import com.itmentorcommunityplatform.mentorservice.domain.MentorDescription;
 import com.itmentorcommunityplatform.mentorservice.dto.*;
-import com.itmentorcommunityplatform.mentorservice.exception.MentorDoesNotExistException;
 import com.itmentorcommunityplatform.mentorservice.exception.MentorDuplicateException;
 import com.itmentorcommunityplatform.mentorservice.httpclient.ServiceHttpClient;
 import com.itmentorcommunityplatform.mentorservice.mapper.MentorMapper;
@@ -29,7 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MentorServiceTest {
+class InternalMentorServiceTest {
 
     public static final long TELEGRAM_MENTOR_ID = 12345L;
 
@@ -46,7 +44,7 @@ class MentorServiceTest {
     @Mock
     private TransactionTemplate transactionTemplate;
 
-    private MentorService mentorService;
+    private InternalMentorService internalMentorService;
 
     private AddMentorWithDescriptionRequest mentorRequest;
 
@@ -56,7 +54,7 @@ class MentorServiceTest {
     void setUp() {
         TelegramUrlValidator telegramUrlValidator = new TelegramUrlValidator();
 
-        mentorService = new MentorService(
+        internalMentorService = new InternalMentorService(
                 telegramUrlValidator,
                 mentorsRepository,
                 programmingLanguagesRepository,
@@ -93,7 +91,7 @@ class MentorServiceTest {
         mockLanguagesAndServices();
         when(httpClient.getProfileByTgUrl(mentorRequest.telegramUrl())).thenReturn(Optional.empty());
 
-        mentorService.createMentorWithDescription(mentorRequest);
+        internalMentorService.createMentorWithDescription(mentorRequest);
 
         verify(httpClient).createProfile(mentorRequest.mentorTelegramUserId(), mentorRequest.telegramUrl());
         verify(mentorsRepository).save(any(Mentor.class));
@@ -105,7 +103,7 @@ class MentorServiceTest {
         ProfileWithTelegramIdDto profileDto = new ProfileWithTelegramIdDto(TELEGRAM_MENTOR_ID, null);
         when(httpClient.getProfileByTgUrl(mentorRequest.telegramUrl())).thenReturn(Optional.of(profileDto));
 
-        mentorService.createMentorWithDescription(mentorRequest);
+        internalMentorService.createMentorWithDescription(mentorRequest);
 
         verify(httpClient, never()).createProfile(any(), any());
         verify(mentorsRepository).save(any(Mentor.class));
@@ -117,7 +115,7 @@ class MentorServiceTest {
         doThrow(new RuntimeException("Profile service error"))
                 .when(httpClient).createProfile(mentorRequest.mentorTelegramUserId(), mentorRequest.telegramUrl());
 
-        assertThrows(RuntimeException.class, () -> mentorService.createMentorWithDescription(mentorRequest));
+        assertThrows(RuntimeException.class, () -> internalMentorService.createMentorWithDescription(mentorRequest));
 
         verify(mentorsRepository, never()).save(any(Mentor.class));
     }
@@ -133,7 +131,7 @@ class MentorServiceTest {
 
         when(mentorsRepository.save(any(Mentor.class))).thenThrow(dbException);
 
-        assertThrows(MentorDuplicateException.class, () -> mentorService.createMentorWithDescription(mentorRequest));
+        assertThrows(MentorDuplicateException.class, () -> internalMentorService.createMentorWithDescription(mentorRequest));
     }
 
     @Test
@@ -153,65 +151,12 @@ class MentorServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> mentorService.createMentorWithDescription(invalidRequest)
+                () -> internalMentorService.createMentorWithDescription(invalidRequest)
         );
 
         verifyNoInteractions(httpClient);
         verifyNoInteractions(mentorsRepository);
     }
-
-    @Test
-    void updateMentorDescription_whenRequestValid_shouldUpdateDescription() {
-        String mentorNewName = "Simple Parker";
-        String mentorNewCost = "300";
-        String mentorNewDescription = "Some description 2";
-
-        when(mentorsRepository.updateMentorDescription(TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription)).thenReturn(Optional.of(
-                new MentorDescription(1L, TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription)
-        ));
-        descriptionRequest = new MentorDescriptionRequestDto(mentorNewName, mentorNewCost, mentorNewDescription);
-
-        mentorService.updateMentorDescription(TELEGRAM_MENTOR_ID, descriptionRequest);
-
-        verify(mentorsRepository).updateMentorDescription(TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription);
-        verifyNoInteractions(httpClient);
-    }
-
-    @Test
-    void updateMentorDescription_whenRequestHasOneField_shouldUpdateOneField() {
-        String mentorNewName = "Simple Parker";
-        String mentorNewCost = null;
-        String mentorNewDescription = null;
-
-        when(mentorsRepository.updateMentorDescription(TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription)).thenReturn(Optional.of(
-                new MentorDescription(1L, TELEGRAM_MENTOR_ID, mentorNewName, "900", "mentorOldDescription")
-        ));
-        descriptionRequest = new MentorDescriptionRequestDto(mentorNewName, mentorNewCost, mentorNewDescription);
-
-        mentorService.updateMentorDescription(TELEGRAM_MENTOR_ID, descriptionRequest);
-
-        verify(mentorsRepository).updateMentorDescription(TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription);
-        verifyNoInteractions(httpClient);
-    }
-
-    @Test
-    void updateMentorDescription_whenMentorNotFound_shouldNotUpdate() {
-        String mentorNewName = "Simple Parker";
-        String mentorNewCost = "22";
-        String mentorNewDescription = "not null";
-
-        when(mentorsRepository.updateMentorDescription(TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription)).thenReturn(Optional.empty());
-        descriptionRequest = new MentorDescriptionRequestDto(mentorNewName, mentorNewCost, mentorNewDescription);
-
-        assertThrows(MentorDoesNotExistException.class,
-                () -> mentorService.updateMentorDescription(TELEGRAM_MENTOR_ID, descriptionRequest));
-
-        verify(mentorsRepository).updateMentorDescription(TELEGRAM_MENTOR_ID, mentorNewName, mentorNewCost, mentorNewDescription);
-
-        verifyNoInteractions(httpClient);
-    }
-
-
 
     private void mockLanguagesAndServices() {
         when(programmingLanguagesRepository.findIdByName("Java")).thenReturn(Optional.of(1L));
