@@ -15,7 +15,11 @@ jobs:
       - name: Get short SHA
         id: vars
         run: |
-          FULL_SHA="${{ github.event.pull_request.head.sha }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            FULL_SHA="${{ github.event.pull_request.head.sha }}"
+          else
+            FULL_SHA="${{ github.sha }}"
+          fi
           echo "full_sha=$FULL_SHA" >> $GITHUB_OUTPUT
           echo "sha_short=$(echo $FULL_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
 
