@@ -1,0 +1,42 @@
+### 201 - Guaranteed review price updated
+PATCH http://localhost:8085/api/mentor/guaranteed-review/1
+X-Telegram-User-Id: 123456
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "priceUsd": 50
+}
+###
+
+### 400 - Invalid prices
+PATCH http://localhost:8085/api/mentor/guaranteed-review/1111
+X-Telegram-User-Id: 1234
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "priceUsd": -3333
+}
+###
+
+### 403 - Current user is not a mentor
+PATCH http://localhost:8085/api/mentor/guaranteed-review/1111
+X-Telegram-User-Id: 1234
+Content-Type: application/json
+
+{
+  "priceUsd": 15
+}
+###
+
+### 404 - Guaranteed review was not found
+PATCH http://localhost:8085/api/mentor/guaranteed-review/99999999
+X-Telegram-User-Id: 123456
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "priceUsd": 30
+}
+###
