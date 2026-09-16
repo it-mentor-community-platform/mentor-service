@@ -50,7 +50,7 @@ public class KafkaConfig {
         typeMapper.addTrustedPackages("*");
         Map<String, Class<?>> mappings = new HashMap<>();
         mappings.put("com.itmentorcommunityplatform.authservice.kafka.UserAuthenticatedEvent", UserAuthenticatedEvent.class);
-        mappings.put("com.itmentorcommunityplatform.projectservice.kafka.ProjectCreatedEvent", ProjectCreatedEvent.class);
+        mappings.put("com.itmentorcommunityplatform.projectservice.dto.kafka.ProjectCreatedEvent", ProjectCreatedEvent.class);
         typeMapper.setIdClassMapping(mappings);
         converter.setTypeMapper(typeMapper);
         return converter;
