@@ -5,6 +5,7 @@ import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.dto.UpdatePriceForGuaranteedReview;
 import com.itmentorcommunityplatform.mentorservice.exception.GuaranteedReviewPriceAlreadyExistsException;
 import com.itmentorcommunityplatform.mentorservice.exception.GuaranteedReviewPriceNotFoundException;
+import com.itmentorcommunityplatform.mentorservice.exception.MentorDoesNotExistException;
 import com.itmentorcommunityplatform.mentorservice.exception.MissingMentorRoleException;
 import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
 import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
@@ -32,7 +33,7 @@ public class GuaranteedReviewPriceService {
     ) {
         Mentor mentor = mentorsRepository
                 .findByMentorTelegramUserId(telegramUserId)
-                .orElseThrow(MissingMentorRoleException::new);
+                .orElseThrow(MentorDoesNotExistException::new);
 
         GuaranteedReviewsPrices reviewPrice = guaranteedReviewsPriceRepository
                 .findByIdAndMentorId(guaranteedReviewId, mentor.getId())
