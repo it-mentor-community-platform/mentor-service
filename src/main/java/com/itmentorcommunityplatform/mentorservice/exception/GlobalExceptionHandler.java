@@ -59,7 +59,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             MentorNotFoundException.class,
-            ProfileNotFoundException.class
+            ProfileNotFoundException.class,
+            GuaranteedReviewPriceNotFoundException.class
     })
     public ResponseEntity<ApiMessageResponse> handleNotFoundException(RuntimeException e) {
         return ResponseEntity

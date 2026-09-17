@@ -4,6 +4,7 @@ import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrice
 import com.itmentorcommunityplatform.mentorservice.domain.Mentor;
 import com.itmentorcommunityplatform.mentorservice.exception.GuaranteedReviewPriceAlreadyExistsException;
 import com.itmentorcommunityplatform.mentorservice.repository.GuaranteedReviewsPriceRepository;
+import com.itmentorcommunityplatform.mentorservice.repository.MentorsRepository;
 import com.itmentorcommunityplatform.mentorservice.validator.MentorProgrammingLanguageValidator;
 import com.itmentorcommunityplatform.mentorservice.validator.ProjectTypeValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,11 +31,15 @@ class GuaranteedReviewPriceServiceTest {
     @Mock
     private GuaranteedReviewsPriceRepository guaranteedReviewsPriceRepository;
 
+    @Mock
+    private MentorsRepository mentorsRepository;
+
     private GuaranteedReviewPriceService guaranteedReviewPriceService;
 
     @BeforeEach
     void setUp() {
         guaranteedReviewPriceService = new GuaranteedReviewPriceService(
+                mentorsRepository,
                 projectTypeValidator,
                 mentorProgrammingLanguageValidator,
                 guaranteedReviewsPriceRepository
