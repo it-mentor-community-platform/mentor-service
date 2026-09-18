@@ -1,49 +1,31 @@
 package com.itmentorcommunityplatform.mentorservice.controller;
 
 import com.itmentorcommunityplatform.mentorservice.docs.PostAddMentorWithDescription;
-import com.itmentorcommunityplatform.mentorservice.docs.PostAddPricesForGuaranteedReviews;
-import com.itmentorcommunityplatform.mentorservice.domain.GuaranteedReviewsPrices;
-
 import com.itmentorcommunityplatform.mentorservice.dto.AddMentorWithDescriptionRequest;
-import com.itmentorcommunityplatform.mentorservice.dto.AddPriceForGuaranteedReviewRequest;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorResponseDto;
-import com.itmentorcommunityplatform.mentorservice.service.MentorService;
+import com.itmentorcommunityplatform.mentorservice.service.InternalMentorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/mentor")
+@RequestMapping("/api/mentor/internal")
 @RequiredArgsConstructor
 public class InternalMentorController {
 
-    private final MentorService mentorService;
+    private final InternalMentorService internalMentorService;
 
-    @PostMapping("/internal/guaranteed-review")
-    @PostAddPricesForGuaranteedReviews
-    public ResponseEntity<GuaranteedReviewsPrices> addPriceForGuaranteedReview(
-            @RequestBody AddPriceForGuaranteedReviewRequest request) {
-
-        GuaranteedReviewsPrices savedPrice = mentorService.insertGuaranteedReviewPrice(request);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(savedPrice);
-    }
-
-    @PostMapping("/internal/mentor")
+    @PostMapping("/mentor")
     @PostAddMentorWithDescription
     public ResponseEntity<MentorResponseDto> createMentorWithDescription(
             @RequestBody @Valid AddMentorWithDescriptionRequest request) {
 
-        MentorResponseDto response = mentorService.createMentorWithDescription(request);
+        MentorResponseDto response = internalMentorService.createMentorWithDescription(request);
 
         return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(response);
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 }

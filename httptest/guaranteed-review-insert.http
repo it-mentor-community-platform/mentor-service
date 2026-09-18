@@ -1,0 +1,127 @@
+### 201 - Guaranteed review price created
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 197342870
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 20
+}
+###
+
+### 409 - Guaranteed review price already exists
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 197342870
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 403 - User does not have MENTOR role
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 197342870
+X-User-Roles: USER
+Content-Type: application/json
+
+{
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 403 - Mentor entity not found
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 9999999999
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 400 - Invalid project type
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 197342870
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "Java",
+  "project_type": "MOTION",
+  "price_usd": 10
+}
+###
+
+### 400 - Missing Telegram user id header
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 400 - Programming language does not exist
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 197342870
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "ABRAKADABRA",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 400 - Mentor does not have programming language
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 423914126
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "Python",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###
+
+### 400 - Price is negative
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 197342870
+X-User-Roles: MENTOR
+Content-Type: application/json
+
+{
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": -1
+}
+###
+
+### 400 - Missing roles header
+POST http://localhost:8085/api/mentor/guaranteed-review
+X-Telegram-User-Id: 197342870
+Content-Type: application/json
+
+{
+  "language": "Java",
+  "project_type": "SIMULATION",
+  "price_usd": 10
+}
+###

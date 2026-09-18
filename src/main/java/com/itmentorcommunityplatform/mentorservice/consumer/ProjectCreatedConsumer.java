@@ -4,7 +4,7 @@ import com.itmentorcommunityplatform.mentorservice.dto.MentorDto;
 import com.itmentorcommunityplatform.mentorservice.dto.event.MentorNotificationEvent;
 import com.itmentorcommunityplatform.mentorservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.mentorservice.producer.MentorNotificationProducer;
-import com.itmentorcommunityplatform.mentorservice.service.MentorService;
+import com.itmentorcommunityplatform.mentorservice.service.MentorSearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -18,14 +18,14 @@ import java.util.List;
 public class ProjectCreatedConsumer {
 
 
-    private final MentorService mentorService;
+    private final MentorSearchService mentorSearchService;
     private final MentorNotificationProducer mentorNotificationProducer;
 
     @KafkaListener(topics = "${spring.kafka.topic.projects-project-created}", groupId = "mentor-service-cg")
     public void consumerProjectCreatedEvent(ProjectCreatedEvent event) {
         log.info("Kafka Consumer: Received user's project create event: {}", event);
         try {
-            List<MentorDto> mentors = mentorService.searchActiveMentorsByLanguageAndProjectType(event.getProgrammingLanguage(), event.getRoadmapProject());
+            List<MentorDto> mentors = mentorSearchService.searchActiveMentorsByLanguageAndProjectType(event.getProgrammingLanguage(), event.getRoadmapProject());
             mentorNotificationProducer.notificateMentors(
                     new MentorNotificationEvent(event, mentors)
             );

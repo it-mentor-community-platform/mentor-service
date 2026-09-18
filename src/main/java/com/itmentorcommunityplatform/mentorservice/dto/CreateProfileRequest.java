@@ -11,5 +11,6 @@ public record CreateProfileRequest(
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record ProfileDetails(
             String telegramUrl
-    ) {}
+    ) {
+    }
 }

@@ -4,7 +4,9 @@ import com.itmentorcommunityplatform.mentorservice.dto.ApiMessageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -12,19 +14,22 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiMessageResponse> handleAnyException(Exception e) {
-
-        log.error("Unexpected error", e);
+    @ExceptionHandler({
+            IllegalArgumentException.class,
+            InvalidTelegramIdException.class,
+            MentorDescriptionEmptyException.class
+    })
+    public ResponseEntity<ApiMessageResponse> illegalArgumentExceptionHandler(RuntimeException e) {
 
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiMessageResponse("Internal server error"));
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ApiMessageResponse(e.getMessage()));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiMessageResponse> illegalArgumentExceptionHandler(IllegalArgumentException e) {
-
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ApiMessageResponse> missingRequestHeaderExceptionHandler(
+            MissingRequestHeaderException e
+    ) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ApiMessageResponse(e.getMessage()));
@@ -33,14 +38,29 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiMessageResponse> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
 
+        FieldError fieldError = e.getBindingResult().getFieldError();
+
+        String message = fieldError == null ? "Method argument not valid" : fieldError.getDefaultMessage();
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ApiMessageResponse(e.getBindingResult().getFieldError().getDefaultMessage()));
+                .body(new ApiMessageResponse(message));
     }
+
+
+    @ExceptionHandler(MentorDoesNotExistException.class)
+    public ResponseEntity<ApiMessageResponse> methodArgumentNotValidExceptionHandler(MentorDoesNotExistException e) {
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ApiMessageResponse(e.getMessage()));
+    }
+
 
     @ExceptionHandler({
             MentorNotFoundException.class,
-            ProfileNotFoundException.class
+            ProfileNotFoundException.class,
+            GuaranteedReviewPriceNotFoundException.class
     })
     public ResponseEntity<ApiMessageResponse> handleNotFoundException(RuntimeException e) {
         return ResponseEntity
@@ -61,6 +81,26 @@ public class GlobalExceptionHandler {
         log.warn("Mentor creation conflict: {}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(new ApiMessageResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiMessageResponse> handleAnyException(Exception e) {
+
+        log.error("Unexpected error", e);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiMessageResponse("Internal server error"));
+    }
+
+
+    @ExceptionHandler(MissingMentorRoleException.class)
+    public ResponseEntity<ApiMessageResponse> handleForbiddenException(
+            MissingMentorRoleException e
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
                 .body(new ApiMessageResponse(e.getMessage()));
     }
 }

@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.mentorservice.consumer;
 
+import com.itmentorcommunityplatform.mentorservice.BaseIntegrationTest;
 import com.itmentorcommunityplatform.mentorservice.domain.type.DataSourceType;
 import com.itmentorcommunityplatform.mentorservice.dto.MentorDto;
 import com.itmentorcommunityplatform.mentorservice.dto.event.MentorNotificationEvent;
@@ -10,12 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,11 +22,7 @@ import static org.mockito.Mockito.verify;
 @Testcontainers
 @SpringBootTest
 @ActiveProfiles("test")
-class ProjectCreatedConsumerIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+class ProjectCreatedConsumerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ProjectCreatedConsumer projectCreatedConsumer;
